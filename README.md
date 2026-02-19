@@ -90,4 +90,4 @@ Environment variables (optional):
 
 ## 📄 License
 
-MIT © [Lord14sol](https://github.com/Lord14sol)
+MIT © 
