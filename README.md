@@ -1,4 +1,4 @@
-# 🤖 Solana Terminator v4.2.1
+# 🤖 Solana Terminator v4.2.2
 
 ### **The Sovereign Autonomous Engine for Solana Agents**
 
@@ -16,7 +16,7 @@ npx solana-terminator-skill@latest
 
 ### 2. Enter the Radar (The Dashboard)
 ```bash
-npx radar
+npx solana-terminator-skill radar
 ```
 *Launch your Matrix-style tactical terminal to monitor everything in real-time.*
 
