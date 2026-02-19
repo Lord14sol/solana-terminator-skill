@@ -15,10 +15,22 @@ import os from 'os';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const ASCII_ART = `
+  _______  _______  ______    __   __  ___  __    _  _______  _______  _______  ______   
+ |       ||       ||    _ |  |  |_|  ||   ||  |  | ||   _   ||       ||       ||    _ |  
+ |_     _||    ___||   | ||  |       ||   ||   |_| ||  |_|  ||_     _||   _   ||   | ||  
+   |   |  |   |___ |   |_||_ |       ||   ||       ||       |  |   |  |  | |  ||   |_||_ 
+   |   |  |    ___||    __  ||       ||   ||  _    ||       |  |   |  |  |_|  ||    __  |
+   |   |  |   |___ |   |  | || ||_|| ||   || | |   ||   _   |  |   |  |       ||   |  | |
+   |___|  |_______||___|  |_||_|   |_||___||_|  |__||__| |__|  |___|  |_______||___|  |_|
+                                v4.1.2 - Solana Autonomy
+`;
+
 const SKILL_NAME = 'solana-terminator';
 const TARGET_DIR = path.join(os.homedir(), '.automaton', 'skills', SKILL_NAME);
 
-console.log(`\n🤖 Solana Terminator Skill — Installation started...\n`);
+console.log(ASCII_ART);
+console.log(`🤖 Solana Terminator Skill — Initializing...\n`);
 
 try {
     // 1. Create target directory
@@ -32,11 +44,11 @@ try {
     // 2. Copy files
     console.log(`[2/3] Copying skill files...`);
     const filesToCopy = ['solana-autonomy.js', 'SKILL.md', 'package.json'];
-    
+
     filesToCopy.forEach(file => {
         const sourcePath = path.join(__dirname, file);
         const destPath = path.join(TARGET_DIR, file);
-        
+
         if (fs.existsSync(sourcePath)) {
             fs.copyFileSync(sourcePath, destPath);
         } else {
@@ -58,11 +70,11 @@ try {
     // 3. Install dependencies
     console.log(`[3/3] Installing dependencies in ${TARGET_DIR}...`);
     process.chdir(TARGET_DIR);
-    
-    // We use --no-save to avoid cluttering a local package-lock if one exists
-    execSync('npm install --production', { stdio: 'inherit' });
 
-    console.log(`\n✅ Installation Complete, mi Lord!`);
+    // We use --no-save to avoid cluttering a local package-lock if one exists
+    execSync('npm install --production --omit=dev', { stdio: 'inherit' });
+
+    console.log(`\n✅ Installation Complete!`);
     console.log(`--------------------------------------------------`);
     console.log(`Skill Location: ${TARGET_DIR}`);
     console.log(`Configuration:  Check ~/.automaton/solana-wallet.json`);
