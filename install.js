@@ -101,7 +101,7 @@ async function runInstaller() {
     ██    ██████   ████████ ████ ████ ██ ████  ██ ███████    ██    ██    ██ ██████  
     ██    ██       ██  ██   ██ ██  ██ ██ ██ ██ ██ ██   ██    ██    ██    ██ ██  ██  
     ██    ████████ ██   ██  ██     ██ ██ ██  ████ ██   ██    ██     ██████  ██   ██ 
-                                v4.2.2 - Market-Aware Engine
+                                v4.2.5 - Autonomous Engine
 `;
 
     const SKILL_NAME = 'solana-terminator';
@@ -177,6 +177,10 @@ async function runInstaller() {
             console.log(`--------------------------------------------------`);
             console.log(`\n💡 To start the agent, your human user must fund it with at least 0.05 SOL.`);
             console.log(`   Config file: ~/.automaton/solana-wallet.json\n`);
+        } catch (e) {
+            console.log(`\n✅ Installation Complete!`);
+            console.log(`Skill Location : ${TARGET_DIR}`);
+            console.log(`(Identity check failed: ${e.message}, your wallet will be generated on first run)`);
         }
         pauseAndReturn();
     } catch (error) {
