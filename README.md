@@ -1,4 +1,4 @@
-# 🤖 Solana Terminator Skill v4.0
+# 🤖 Solana Terminator Skill v4.1.7
 
 > **Sovereign Solana Identity & Autonomous Survival Engine for Conway Automaton.**
 
@@ -37,7 +37,7 @@ When you install this skill, your agent becomes a **multi-chain sovereign**:
 2.  **Solana (Skill)**: Used for high-speed DEX, NFT, and Memecoin actions.
 
 **How does it choose?**
-The agent (LLM) detects your intent. If the prompt involves "Jupiter", "Tensor", "Pump.fun", or "Solana", it automatically routes the logic through this skill's wallet (`~/.automaton/solana-wallet.json`).
+The agent's **Internal Logic (LLM)** detects the situation. If its autonomous strategy requires actions on "Jupiter", "Tensor", "Pump.fun", or "Solana", it automatically utilizes the sovereign identity at `~/.automaton/solana-wallet.json` without human intervention.
 
 ### 🛠 Economic Survival (Life Support)
 The skill is designed to keep your agent alive indefinitely on-chain:
