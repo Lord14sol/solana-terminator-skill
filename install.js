@@ -11,12 +11,27 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import os from 'os';
+import readline from 'readline';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-import readline from 'readline';
+
+// ─── Constants ──────────────────────────────────────────────────────────────
+
+const ASCII_ART = `
+ ████████ ████████ ████████ ██     ██ ██ ██    ██  █████  ████████  ██████  ██████  
+    ██    ██       ██    ██ ███   ███ ██ ███   ██ ██   ██    ██    ██    ██ ██   ██ 
+    ██    ██████   ████████ ████ ████ ██ ████  ██ ███████    ██    ██    ██ ██████  
+    ██    ██       ██  ██   ██ ██  ██ ██ ██ ██ ██ ██   ██    ██    ██    ██ ██  ██  
+    ██    ████████ ██   ██  ██     ██ ██ ██  ████ ██   ██    ██     ██████  ██   ██ 
+                                v4.2.6 - Autonomous Engine
+`;
+
+const SKILL_NAME = 'solana-terminator';
+const TARGET_DIR = path.join(os.homedir(), '.automaton', 'skills', SKILL_NAME);
 
 // ─── Command Routing ────────────────────────────────────────────────────────
+
 const args = process.argv.slice(2);
 
 if (args.includes('radar')) {
@@ -26,6 +41,8 @@ if (args.includes('radar')) {
 } else {
     showMainMenu();
 }
+
+// ─── Menu System ────────────────────────────────────────────────────────────
 
 function showMainMenu() {
     process.stdout.write('\x1Bc');
@@ -58,6 +75,7 @@ function showMainMenu() {
 function showDocs() {
     const skillPath = path.join(TARGET_DIR, 'SKILL.md');
     if (fs.existsSync(skillPath)) {
+        process.stdout.write('\x1Bc');
         console.log(fs.readFileSync(skillPath, 'utf8'));
     } else {
         console.log(`⚠️ Documentation not found. Please install the skill first.`);
@@ -93,20 +111,9 @@ function pauseAndReturn() {
     });
 }
 
+// ─── Installer Logic ────────────────────────────────────────────────────────
+
 async function runInstaller() {
-
-    const ASCII_ART = `
- ████████ ████████ ████████ ██     ██ ██ ██    ██  █████  ████████  ██████  ██████  
-    ██    ██       ██    ██ ███   ███ ██ ███   ██ ██   ██    ██    ██    ██ ██   ██ 
-    ██    ██████   ████████ ████ ████ ██ ████  ██ ███████    ██    ██    ██ ██████  
-    ██    ██       ██  ██   ██ ██  ██ ██ ██ ██ ██ ██   ██    ██    ██    ██ ██  ██  
-    ██    ████████ ██   ██  ██     ██ ██ ██  ████ ██   ██    ██     ██████  ██   ██ 
-                                v4.2.5 - Autonomous Engine
-`;
-
-    const SKILL_NAME = 'solana-terminator';
-    const TARGET_DIR = path.join(os.homedir(), '.automaton', 'skills', SKILL_NAME);
-
     console.log(ASCII_ART);
     console.log(`🤖 Solana Terminator Skill — Initializing...\n`);
 
@@ -121,7 +128,7 @@ async function runInstaller() {
 
         // 2. Copy files
         console.log(`[2/3] Copying skill files...`);
-        const filesToCopy = ['solana-autonomy.js', 'SKILL.md', 'package.json'];
+        const filesToCopy = ['solana-autonomy.js', 'SKILL.md', 'package.json', 'radar.js'];
 
         filesToCopy.forEach(file => {
             const sourcePath = path.join(__dirname, file);
@@ -137,33 +144,30 @@ async function runInstaller() {
         // 3. Install dependencies
         console.log(`[3/3] Installing dependencies in ${TARGET_DIR}...`);
         process.chdir(TARGET_DIR);
-
-        // We use --no-save to avoid cluttering a local package-lock if one exists
         execSync('npm install --production --omit=dev', { stdio: 'inherit' });
 
         // 4. Show/Generate Wallet Address
         console.log(`\n🔍 Initializing Agent Identity...`);
         try {
             const checkScript = `
-            import { Keypair } from '@solana/web3.js';
-            import fs from 'fs';
-            import path from 'path';
-            import os from 'os';
-            const walletPath = path.join(os.homedir(), '.automaton', 'solana-wallet.json');
-            
-            let keypair;
-            if (fs.existsSync(walletPath)) {
-                const raw = fs.readFileSync(walletPath, 'utf8');
-                keypair = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(raw)));
-            } else {
-                keypair = Keypair.generate();
-                const dir = path.dirname(walletPath);
-                if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-                fs.writeFileSync(walletPath, JSON.stringify(Array.from(keypair.secretKey)), { mode: 0o600 });
-            }
-            console.log(keypair.publicKey.toBase58());
-        `;
-            // Write the script to a temporary file to run with node
+                import { Keypair } from '@solana/web3.js';
+                import fs from 'fs';
+                import path from 'path';
+                import os from 'os';
+                const walletPath = path.join(os.homedir(), '.automaton', 'solana-wallet.json');
+                
+                let keypair;
+                if (fs.existsSync(walletPath)) {
+                    const raw = fs.readFileSync(walletPath, 'utf8');
+                    keypair = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(raw)));
+                } else {
+                    keypair = Keypair.generate();
+                    const dir = path.dirname(walletPath);
+                    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+                    fs.writeFileSync(walletPath, JSON.stringify(Array.from(keypair.secretKey)), { mode: 0o600 });
+                }
+                console.log(keypair.publicKey.toBase58());
+            `;
             const tempScriptPath = path.join(TARGET_DIR, 'temp-check.js');
             fs.writeFileSync(tempScriptPath, checkScript);
 
@@ -183,6 +187,7 @@ async function runInstaller() {
             console.log(`(Identity check failed: ${e.message}, your wallet will be generated on first run)`);
         }
         pauseAndReturn();
+
     } catch (error) {
         console.error(`\n❌ Installation failed: ${error.message}`);
         process.exit(1);
