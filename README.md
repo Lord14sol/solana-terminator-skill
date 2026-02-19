@@ -1,4 +1,4 @@
-# 🤖 Solana Terminator Skill v4.1.8
+# 🤖 Solana Terminator Skill v4.1.9
 
 > **Sovereign Solana Identity & Autonomous Survival Engine for Conway Automaton.**
 
@@ -64,7 +64,7 @@ npx solana-terminator-skill
 | Category | Methods |
 |----------|---------|
 | **Identity** | `getAddress`, `getSolBalance`, `getUsdcBalance`, `getStatus` |
-| **Survival** | `keepAlive`, `requestAirdrop` |
+| **Survival** | `keepAlive` |
 | **Transfers** | `sendSol`, `sendToken` |
 | **DEX** | `swap` (Jupiter Aggregator v6) |
 | **Memecoins** | `pumpBuy`, `pumpSell` (Pump.fun via PumpPortal) |
@@ -85,23 +85,6 @@ Environment variables (optional):
 - `SOLANA_RPC_URL`: Your custom RPC (defaults to Mainnet Beta).
 - `JUPITER_API_KEY`: Required for high-frequency trading (optional for basic use).
 - `TENSOR_API_KEY`: Required for NFT operations.
-
-## 🛡️ Responsibility Model
-
-This project follows a strict **Brain/Hands separation**:
-- **Terminator Skill (The Hands)**: Provides 100% audited, secure, and functional methods to interact with Solana.
-- **Conway Automaton (The Brain)**: The intelligence that decides *when* and *how* to call these methods.
-
-**Note**: The effectiveness of the agent's strategy depends entirely on its own reasoning and prompt configuration. This skill is the "Door"; it is up to the agent to walk through it.
-
----
-
-## ⚠️ Disclaimer
-
-Cryptocurrency trading involves significant risk. This is an **autonomous tool**. 
-- Always test with small amounts first.
-- The authors are not responsible for financial losses, agent miscalculations, or market volatility.
-- The "Life Support" system is a tool, not a guarantee of solvency.
 
 ---
 

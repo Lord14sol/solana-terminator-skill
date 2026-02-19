@@ -28,20 +28,20 @@ import 'dotenv/config';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const USDC_MINT        = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-const SOL_MINT         = 'So11111111111111111111111111111111111111112';
-const MEMO_PROGRAM_ID  = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
-const PUMPPORTAL_API   = 'https://pumpportal.fun/api/trade-local';
-const TENSOR_API       = 'https://api.tensor.so/graphql';
+const USDC_MINT = new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+const SOL_MINT = 'So11111111111111111111111111111111111111112';
+const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
+const PUMPPORTAL_API = 'https://pumpportal.fun/api/trade-local';
+const TENSOR_API = 'https://api.tensor.so/graphql';
 // lite-api.jup.ag = free, no API key needed (rate-limited)
 // api.jup.ag/swap/v1 = paid, requires JUPITER_API_KEY (faster)
-const JUPITER_API      = process.env.JUPITER_API_KEY
+const JUPITER_API = process.env.JUPITER_API_KEY
   ? 'https://api.jup.ag/swap/v1'
   : 'https://lite-api.jup.ag/swap/v1';
 
 // Survival thresholds — tuned for Solana (fees ~$0.00025/tx)
-const USDC_LOW         = 0.50;  // $0.50 — trigger swap to replenish USDC
-const SOL_RESERVE      = 0.003; // always keep for fees, never swap this
+const USDC_LOW = 0.50;  // $0.50 — trigger swap to replenish USDC
+const SOL_RESERVE = 0.003; // always keep for fees, never swap this
 const DEFAULT_SWAP_SOL = 0.02;  // swap ~$3-4 SOL → USDC when low
 
 /**
@@ -74,7 +74,7 @@ export class SolanaAutonomy {
   _loadIdentity() {
     try {
       if (fs.existsSync(this.walletPath)) {
-        const raw     = fs.readFileSync(this.walletPath, 'utf8');
+        const raw = fs.readFileSync(this.walletPath, 'utf8');
         const keypair = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(raw)));
         console.log(`[Solana] Identity: ${keypair.publicKey.toBase58()}`);
         return keypair;
@@ -116,7 +116,7 @@ export class SolanaAutonomy {
   async getUsdcBalance() {
     if (!this.identity) return 0;
     try {
-      const ata     = await getAssociatedTokenAddress(USDC_MINT, this.identity.publicKey);
+      const ata = await getAssociatedTokenAddress(USDC_MINT, this.identity.publicKey);
       const account = await getAccount(this.connection, ata);
       return Number(account.amount) / 1_000_000; // USDC has 6 decimals
     } catch {
@@ -134,8 +134,8 @@ export class SolanaAutonomy {
       address: this.getAddress(),
       sol,
       usdc,
-      solLow:  sol  <= SOL_RESERVE,
-      usdcLow: usdc <  USDC_LOW,
+      solLow: sol <= SOL_RESERVE,
+      usdcLow: usdc < USDC_LOW,
     };
   }
 
@@ -160,8 +160,8 @@ export class SolanaAutonomy {
       console.error(`[LifeSupport] DEAD — ${msg}`);
       return {
         success: false,
-        status:  'dead',
-        action:  'needs_sol_funding',
+        status: 'dead',
+        action: 'needs_sol_funding',
         address: this.getAddress(),
         message: msg,
       };
@@ -184,10 +184,10 @@ export class SolanaAutonomy {
 
         return {
           success: true,
-          status:  'stabilized',
-          action:  'swapped_sol_to_usdc',
-          txHash:  result.txHash,
-          amount:  amountSol,
+          status: 'stabilized',
+          action: 'swapped_sol_to_usdc',
+          txHash: result.txHash,
+          amount: amountSol,
         };
       } catch (err) {
         return { success: false, status: 'error', action: 'swap_failed', error: err.message };
@@ -227,11 +227,11 @@ export class SolanaAutonomy {
     const { data: swapData } = await axios.post(
       `${JUPITER_API}/swap`,
       {
-        quoteResponse:             quote,
-        userPublicKey:             this.identity.publicKey.toBase58(),
-        wrapAndUnwrapSol:          true,
+        quoteResponse: quote,
+        userPublicKey: this.identity.publicKey.toBase58(),
+        wrapAndUnwrapSol: true,
         prioritizationFeeLamports: 1_000,
-        dynamicComputeUnitLimit:   true,
+        dynamicComputeUnitLimit: true,
       },
       { headers, timeout: 15_000 },
     );
@@ -242,7 +242,7 @@ export class SolanaAutonomy {
 
     const signature = await this.connection.sendRawTransaction(tx.serialize(), {
       skipPreflight: false,
-      maxRetries:    3,
+      maxRetries: 3,
     });
 
     // 4. Confirm
@@ -254,24 +254,11 @@ export class SolanaAutonomy {
     console.log(`[Jupiter] Confirmed: ${signature}`);
 
     return {
-      success:   true,
-      txHash:    signature,
-      inAmount:  amount,
+      success: true,
+      txHash: signature,
+      inAmount: amount,
       outAmount: Number(quote.outAmount),
     };
-  }
-
-  /**
-   * Airdrop SOL — only works on devnet/testnet for testing.
-   */
-  async requestAirdrop(solAmount = 1) {
-    const sig = await this.connection.requestAirdrop(
-      this.identity.publicKey,
-      solAmount * LAMPORTS_PER_SOL,
-    );
-    const { blockhash, lastValidBlockHeight } = await this.connection.getLatestBlockhash();
-    await this.connection.confirmTransaction({ signature: sig, blockhash, lastValidBlockHeight });
-    return sig;
   }
 
   // ─── SOL Transfer ───────────────────────────────────────────────────────
@@ -288,8 +275,8 @@ export class SolanaAutonomy {
     const tx = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: this.identity.publicKey,
-        toPubkey:   new PublicKey(to),
-        lamports:   Math.floor(amountSol * LAMPORTS_PER_SOL),
+        toPubkey: new PublicKey(to),
+        lamports: Math.floor(amountSol * LAMPORTS_PER_SOL),
       }),
     );
 
@@ -311,11 +298,11 @@ export class SolanaAutonomy {
   async sendToken(mintAddress, to, amount) {
     if (!this.identity) throw new Error('No Solana identity loaded');
 
-    const mint   = new PublicKey(mintAddress);
+    const mint = new PublicKey(mintAddress);
     const destPk = new PublicKey(to);
 
     const sourceAta = await getAssociatedTokenAddress(mint, this.identity.publicKey);
-    const destAta   = await getOrCreateAssociatedTokenAccount(
+    const destAta = await getOrCreateAssociatedTokenAccount(
       this.connection, this.identity, mint, destPk,
     );
 
@@ -341,9 +328,9 @@ export class SolanaAutonomy {
 
     const tx = new Transaction().add(
       new TransactionInstruction({
-        keys:      [{ pubkey: this.identity.publicKey, isSigner: true, isWritable: true }],
+        keys: [{ pubkey: this.identity.publicKey, isSigner: true, isWritable: true }],
         programId: MEMO_PROGRAM_ID,
-        data:      Buffer.from(message, 'utf-8'),
+        data: Buffer.from(message, 'utf-8'),
       }),
     );
 
@@ -364,21 +351,21 @@ export class SolanaAutonomy {
     if (!this.identity) throw new Error('No Solana identity loaded');
 
     const stakeAccount = Keypair.generate();
-    const lamports     = Math.floor(amountSol * LAMPORTS_PER_SOL);
-    const minBalance   = await this.connection.getMinimumBalanceForRentExemption(200);
+    const lamports = Math.floor(amountSol * LAMPORTS_PER_SOL);
+    const minBalance = await this.connection.getMinimumBalanceForRentExemption(200);
 
     const tx = new Transaction().add(
       StakeProgram.createAccount({
-        fromPubkey:    this.identity.publicKey,
-        stakePubkey:   stakeAccount.publicKey,
-        authorized:    new Authorized(this.identity.publicKey, this.identity.publicKey),
-        lockup:        new Lockup(0, 0, this.identity.publicKey),
-        lamports:      lamports + minBalance,
+        fromPubkey: this.identity.publicKey,
+        stakePubkey: stakeAccount.publicKey,
+        authorized: new Authorized(this.identity.publicKey, this.identity.publicKey),
+        lockup: new Lockup(0, 0, this.identity.publicKey),
+        lamports: lamports + minBalance,
       }),
       StakeProgram.delegate({
-        stakePubkey:   stakeAccount.publicKey,
+        stakePubkey: stakeAccount.publicKey,
         authorizedPubkey: this.identity.publicKey,
-        votePubkey:    new PublicKey(validatorVote),
+        votePubkey: new PublicKey(validatorVote),
       }),
     );
 
@@ -389,9 +376,9 @@ export class SolanaAutonomy {
     console.log(`[Stake] ${amountSol} SOL → validator ${validatorVote}: ${signature}`);
     return {
       success: true,
-      txHash:  signature,
+      txHash: signature,
       stakeAccount: stakeAccount.publicKey.toBase58(),
-      amount:  amountSol,
+      amount: amountSol,
       validator: validatorVote,
     };
   }
@@ -406,7 +393,7 @@ export class SolanaAutonomy {
 
     const tx = new Transaction().add(
       StakeProgram.deactivate({
-        stakePubkey:      new PublicKey(stakeAccountAddress),
+        stakePubkey: new PublicKey(stakeAccountAddress),
         authorizedPubkey: this.identity.publicKey,
       }),
     );
@@ -431,14 +418,14 @@ export class SolanaAutonomy {
     console.log(`[PumpFun] Buying ${mint} for ${amountSol} SOL...`);
 
     const response = await axios.post(PUMPPORTAL_API, {
-      publicKey:        this.identity.publicKey.toBase58(),
-      action:           'buy',
+      publicKey: this.identity.publicKey.toBase58(),
+      action: 'buy',
       mint,
       denominatedInSol: 'true',
-      amount:           amountSol,
+      amount: amountSol,
       slippage,
-      priorityFee:      0.0001,
-      pool:             'auto',
+      priorityFee: 0.0001,
+      pool: 'auto',
     }, { responseType: 'arraybuffer', timeout: 30_000 });
 
     const tx = VersionedTransaction.deserialize(new Uint8Array(response.data));
@@ -466,14 +453,14 @@ export class SolanaAutonomy {
     console.log(`[PumpFun] Selling ${amount} of ${mint}...`);
 
     const response = await axios.post(PUMPPORTAL_API, {
-      publicKey:        this.identity.publicKey.toBase58(),
-      action:           'sell',
+      publicKey: this.identity.publicKey.toBase58(),
+      action: 'sell',
       mint,
       denominatedInSol: 'false',
       amount,
       slippage,
-      priorityFee:      0.0001,
-      pool:             'auto',
+      priorityFee: 0.0001,
+      pool: 'auto',
     }, { responseType: 'arraybuffer', timeout: 30_000 });
 
     const tx = VersionedTransaction.deserialize(new Uint8Array(response.data));
@@ -517,8 +504,8 @@ export class SolanaAutonomy {
     const { data } = await axios.post(TENSOR_API, {
       query,
       variables: {
-        mint:     mintAddress,
-        buyer:    this.identity.publicKey.toBase58(),
+        mint: mintAddress,
+        buyer: this.identity.publicKey.toBase58(),
         maxPrice: String(Math.floor(maxPriceSol * LAMPORTS_PER_SOL)),
       },
     }, {
@@ -531,7 +518,7 @@ export class SolanaAutonomy {
 
     // Prefer versioned tx
     const raw = txData.txV0 || txData.tx;
-    const tx  = VersionedTransaction.deserialize(Buffer.from(raw, 'base64'));
+    const tx = VersionedTransaction.deserialize(Buffer.from(raw, 'base64'));
     tx.sign([this.identity]);
 
     const signature = await this.connection.sendRawTransaction(tx.serialize(), {
@@ -571,8 +558,8 @@ export class SolanaAutonomy {
     const { data } = await axios.post(TENSOR_API, {
       query: listQuery,
       variables: {
-        mint:     mintAddress,
-        seller:   this.identity.publicKey.toBase58(),
+        mint: mintAddress,
+        seller: this.identity.publicKey.toBase58(),
         minPrice: String(Math.floor(minPriceSol * LAMPORTS_PER_SOL)),
       },
     }, {
@@ -584,7 +571,7 @@ export class SolanaAutonomy {
     if (!txData) throw new Error('No pool bid found at or above minPriceSol');
 
     const raw = txData.txV0 || txData.tx;
-    const tx  = VersionedTransaction.deserialize(Buffer.from(raw, 'base64'));
+    const tx = VersionedTransaction.deserialize(Buffer.from(raw, 'base64'));
     tx.sign([this.identity]);
 
     const signature = await this.connection.sendRawTransaction(tx.serialize(), {
@@ -615,28 +602,28 @@ export class SolanaAutonomy {
     let DLMM, StrategyType, BN;
     try {
       const dlmmMod = await import('@meteora-ag/dlmm');
-      DLMM         = dlmmMod.default || dlmmMod.DLMM;
-      StrategyType  = dlmmMod.StrategyType;
-      BN            = (await import('bn.js')).default;
+      DLMM = dlmmMod.default || dlmmMod.DLMM;
+      StrategyType = dlmmMod.StrategyType;
+      BN = (await import('bn.js')).default;
     } catch {
       throw new Error('Install @meteora-ag/dlmm @coral-xyz/anchor bn.js for Meteora liquidity');
     }
 
     console.log(`[Meteora] Adding liquidity to pool ${poolAddress}...`);
 
-    const pool      = await DLMM.create(this.connection, new PublicKey(poolAddress));
+    const pool = await DLMM.create(this.connection, new PublicKey(poolAddress));
     const activeBin = await pool.getActiveBin();
-    const minBinId  = activeBin.binId - rangeWidth;
-    const maxBinId  = activeBin.binId + rangeWidth;
+    const minBinId = activeBin.binId - rangeWidth;
+    const maxBinId = activeBin.binId + rangeWidth;
 
     const newPosition = Keypair.generate();
 
     const createTx = await pool.initializePositionAndAddLiquidityByStrategy({
       positionPubKey: newPosition.publicKey,
-      user:           this.identity.publicKey,
-      totalXAmount:   new BN(amountX),
-      totalYAmount:   new BN(amountY),
-      strategy:       { maxBinId, minBinId, strategyType: StrategyType.Spot },
+      user: this.identity.publicKey,
+      totalXAmount: new BN(amountX),
+      totalYAmount: new BN(amountY),
+      strategy: { maxBinId, minBinId, strategyType: StrategyType.Spot },
     });
 
     const signature = await sendAndConfirmTransaction(
@@ -645,9 +632,9 @@ export class SolanaAutonomy {
 
     console.log(`[Meteora] Liquidity added: ${signature}`);
     return {
-      success:  true,
-      txHash:   signature,
-      pool:     poolAddress,
+      success: true,
+      txHash: signature,
+      pool: poolAddress,
       position: newPosition.publicKey.toBase58(),
     };
   }
@@ -665,7 +652,7 @@ export class SolanaAutonomy {
     try {
       const dlmmMod = await import('@meteora-ag/dlmm');
       DLMM = dlmmMod.default || dlmmMod.DLMM;
-      BN   = (await import('bn.js')).default;
+      BN = (await import('bn.js')).default;
     } catch {
       throw new Error('Install @meteora-ag/dlmm @coral-xyz/anchor bn.js for Meteora liquidity');
     }
@@ -680,12 +667,12 @@ export class SolanaAutonomy {
     const binIds = position.positionData.positionBinData.map(b => b.binId);
 
     const removeTx = await pool.removeLiquidity({
-      position:                new PublicKey(positionAddress),
-      user:                    this.identity.publicKey,
-      fromBinId:               binIds[0],
-      toBinId:                 binIds[binIds.length - 1],
-      liquiditiesBpsToRemove:  new Array(binIds.length).fill(new BN(100 * 100)),
-      shouldClaimAndClose:     true,
+      position: new PublicKey(positionAddress),
+      user: this.identity.publicKey,
+      fromBinId: binIds[0],
+      toBinId: binIds[binIds.length - 1],
+      liquiditiesBpsToRemove: new Array(binIds.length).fill(new BN(100 * 100)),
+      shouldClaimAndClose: true,
     });
 
     const txs = Array.isArray(removeTx) ? removeTx : [removeTx];
