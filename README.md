@@ -20,10 +20,10 @@ This skill gives your agent "Solana Hands" and a sophisticated "Life Support" sy
 
 ## 🛠 Installation
 
-The fastest way to install is via **npx** (from GitHub):
+The fastest way to install is via **npx**:
 
 ```bash
-npx github:Lord14sol/solana-terminator-skill
+npx solana-terminator-skill
 ```
 
 This automates the directory creation, file downloads, and dependency setup.

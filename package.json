@@ -33,5 +33,21 @@
     "staking",
     "memecoin"
   ],
-  "license": "MIT"
+  "author": "Lord14sol",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "solana-autonomy.js",
+    "install.js",
+    "SKILL.md",
+    "README.md",
+    "package.json",
+    "solana-autonomy/SKILL.md"
+  ],
+  "homepage": "https://github.com/Lord14sol/solana-terminator-skill#readme",
+  "bugs": {
+    "url": "https://github.com/Lord14sol/solana-terminator-skill/issues"
+  }
 }
