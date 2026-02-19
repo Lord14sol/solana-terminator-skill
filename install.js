@@ -21,7 +21,7 @@ const ASCII_ART = `
     ██    ██████   ████████ ████ ████ ██ ████  ██ ███████    ██    ██    ██ ██████  
     ██    ██       ██  ██   ██ ██  ██ ██ ██ ██ ██ ██   ██    ██    ██    ██ ██  ██  
     ██    ████████ ██   ██  ██     ██ ██ ██  ████ ██   ██    ██     ██████  ██   ██ 
-                                v4.1.5 - Solana Autonomy
+                                v4.1.6 - Solana Autonomy
 `;
 
 const SKILL_NAME = 'solana-terminator';
@@ -72,8 +72,8 @@ try {
     // We use --no-save to avoid cluttering a local package-lock if one exists
     execSync('npm install --production --omit=dev', { stdio: 'inherit' });
 
-    // 4. Show Wallet Address
-    console.log(`\n🔍 Checking Agent Identity...`);
+    // 4. Show/Generate Wallet Address
+    console.log(`\n🔍 Initializing Agent Identity...`);
     try {
         const checkScript = `
             const { Keypair } = require('@solana/web3.js');
@@ -81,29 +81,31 @@ try {
             const path = require('path');
             const walletPath = path.join(process.env.HOME || '/root', '.automaton', 'solana-wallet.json');
             
+            let keypair;
             if (fs.existsSync(walletPath)) {
                 const raw = fs.readFileSync(walletPath, 'utf8');
-                const keypair = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(raw)));
-                console.log(keypair.publicKey.toBase58());
+                keypair = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(raw)));
             } else {
-                console.log('NOT_FOUND');
+                keypair = Keypair.generate();
+                const dir = path.dirname(walletPath);
+                if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+                fs.writeFileSync(walletPath, JSON.stringify(Array.from(keypair.secretKey)), { mode: 0o600 });
             }
+            console.log(keypair.publicKey.toBase58());
         `;
         const address = execSync(`node -e "${checkScript.replace(/\n/g, '')}"`, { encoding: 'utf8' }).trim();
 
         console.log(`\n✅ Installation Complete!`);
         console.log(`--------------------------------------------------`);
         console.log(`Skill Location : ${TARGET_DIR}`);
-        if (address !== 'NOT_FOUND') {
-            console.log(`Agent Address  : ${address}  👈 FUND THIS ADDRESS`);
-        } else {
-            console.log(`Agent Identity : Will be generated on first agent run.`);
-        }
-        console.log(`Configuration  : Check ~/.automaton/solana-wallet.json`);
-        console.log(`--------------------------------------------------\n`);
+        console.log(`AGENT ADDRESS  : ${address}  👈 FUND THIS ADDRESS`);
+        console.log(`--------------------------------------------------`);
+        console.log(`\n💡 To start the agent, your human user must fund it with at least 0.05 SOL.`);
+        console.log(`   Config file: ~/.automaton/solana-wallet.json\n`);
     } catch (e) {
         console.log(`\n✅ Installation Complete!`);
-        console.log(`(Identity will be shown when the agent starts)`);
+        console.log(`Skill Location : ${TARGET_DIR}`);
+        console.log(`(Identity check failed, will generate on first run)`);
     }
 
 } catch (error) {

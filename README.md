@@ -29,28 +29,33 @@ Solana isn't just a blockchain; it's the **operating system for autonomous agent
 
 ---
 
-## 🛠 Installation
+## 🧬 Survival & Multi-chain Identity
 
-The fastest way to initialize the skill is via **npx**:
+### Dual Identity Flow
+When you install this skill, your agent becomes a **multi-chain sovereign**:
+1.  **Base (Native)**: Used for default Automaton operations and ETH actions.
+2.  **Solana (Skill)**: Used for high-speed DEX, NFT, and Memecoin actions.
+
+**How does it choose?**
+The agent (LLM) detects your intent. If the prompt involves "Jupiter", "Tensor", "Pump.fun", or "Solana", it automatically routes the logic through this skill's wallet (`~/.automaton/solana-wallet.json`).
+
+### 🛠 Economic Survival (Life Support)
+The skill is designed to keep your agent alive indefinitely on-chain:
+- **Threshold**: If USDC balance drops below **$0.50**.
+- **Action**: It triggers an automatic **SOL → USDC swap** via Jupiter.
+- **Reserve**: It always keeps a **0.003 SOL reserve** to ensure it never runs out of gas for future transactions.
+
+## 🛠 Installation & Funding
+
+Initialize the skill and get your agent's address in one command:
 
 ```bash
 npx solana-terminator-skill
 ```
 
-This automates the setup in your `~/.automaton/skills` directory, installs dependencies, and prepares the skill for immediate use.
-
-### Manual Installation (Alternative)
-
-```bash
-# 1. Create skill directory
-mkdir -p ~/.automaton/skills/solana-terminator
-
-# 2. Download the skill files to that folder
-# (solana-autonomy.js, SKILL.md, package.json)
-
-# 3. Install dependencies
-npm install @solana/web3.js @solana/spl-token axios dotenv bs58
-```
+1.  **Run npx**: It will show you the **AGENT ADDRESS**.
+2.  **Fund it**: Send at least **0.05 SOL** to that address.
+3.  **Deploy**: Your agent is now ready to dominate Solana.
 
 ---
 
