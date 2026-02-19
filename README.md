@@ -64,8 +64,7 @@ npx solana-terminator-skill
 | Category | Methods |
 |----------|---------|
 | **Identity** | `getAddress`, `getSolBalance`, `getUsdcBalance`, `getStatus` |
-| **Survival** | `keepAlive` |
-| **Transfers** | `sendSol`, `sendToken` |
+| **Survival** | `sendSol(to, amount)` | Send native SOL |
 | **DEX** | `swap` (Jupiter Aggregator v6) |
 | **Memecoins** | `pumpBuy`, `pumpSell` (Pump.fun via PumpPortal) |
 | **NFTs** | `buyNft`, `sellNft` (Tensor GraphQL) |
@@ -90,4 +89,4 @@ Environment variables (optional):
 
 ## 📄 License
 
-MIT © 
+MIT © [Lord14sol](https://github.com/Lord14sol)
