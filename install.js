@@ -14,12 +14,83 @@ import os from 'os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+import readline from 'readline';
 
 // ─── Command Routing ────────────────────────────────────────────────────────
-if (process.argv.includes('radar')) {
+const args = process.argv.slice(2);
+
+if (args.includes('radar')) {
     import('./radar.js');
-} else {
+} else if (args.includes('install')) {
     runInstaller();
+} else {
+    showMainMenu();
+}
+
+function showMainMenu() {
+    process.stdout.write('\x1Bc');
+    console.log(ASCII_ART);
+    console.log(`🤖 Solana Terminator — Main Control Unit\n`);
+    console.log(`[1] 🛠  Install/Initialize Skill`);
+    console.log(`[2] 📡 Launch Tactical Radar (Dashboard)`);
+    console.log(`[3] 🔍 View Agent Identity & Wallet`);
+    console.log(`[4] 📄 Show Documentation (SKILL.md)`);
+    console.log(`[x] Exit\n`);
+
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    rl.question('Select an option: ', (answer) => {
+        rl.close();
+        switch (answer.toLowerCase()) {
+            case '1': runInstaller(); break;
+            case '2': import('./radar.js'); break;
+            case '3': showIdentity(); break;
+            case '4': showDocs(); break;
+            case 'x': process.exit(0);
+            default: showMainMenu();
+        }
+    });
+}
+
+function showDocs() {
+    const skillPath = path.join(TARGET_DIR, 'SKILL.md');
+    if (fs.existsSync(skillPath)) {
+        console.log(fs.readFileSync(skillPath, 'utf8'));
+    } else {
+        console.log(`⚠️ Documentation not found. Please install the skill first.`);
+    }
+    pauseAndReturn();
+}
+
+function showIdentity() {
+    const walletPath = path.join(os.homedir(), '.automaton', 'solana-wallet.json');
+    if (fs.existsSync(walletPath)) {
+        import('./solana-autonomy.js').then(async ({ SolanaAutonomy }) => {
+            const solana = new SolanaAutonomy();
+            const status = await solana.getStatus();
+            console.log(`\n✅ AGENT IDENTITY FOUND`);
+            console.log(`--------------------------------------------------`);
+            console.log(`ADDRESS : ${status.address}`);
+            console.log(`SOL     : ${status.sol.toFixed(4)}`);
+            console.log(`USDC    : $${status.usdc.toFixed(2)}`);
+            console.log(`--------------------------------------------------`);
+            pauseAndReturn();
+        });
+    } else {
+        console.log(`⚠️ Identity not found. Please run Option [1] first.`);
+        pauseAndReturn();
+    }
+}
+
+function pauseAndReturn() {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    rl.question('\nPress ENTER to return to menu...', () => {
+        rl.close();
+        showMainMenu();
+    });
 }
 
 async function runInstaller() {
@@ -106,13 +177,8 @@ async function runInstaller() {
             console.log(`--------------------------------------------------`);
             console.log(`\n💡 To start the agent, your human user must fund it with at least 0.05 SOL.`);
             console.log(`   Config file: ~/.automaton/solana-wallet.json\n`);
-        } catch (e) {
-            console.log(`\n✅ Installation Complete!`);
-            console.log(`Skill Location : ${TARGET_DIR}`);
-            console.log(`(Identity check failed: ${e.message}, your wallet will be generated on first run)`);
-            console.log(`Manual Check: cat ~/.automaton/solana-wallet.json`);
         }
-
+        pauseAndReturn();
     } catch (error) {
         console.error(`\n❌ Installation failed: ${error.message}`);
         process.exit(1);
