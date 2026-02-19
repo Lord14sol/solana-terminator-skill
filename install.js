@@ -24,7 +24,7 @@ const ASCII_ART = `
     ██    ██████   ████████ ████ ████ ██ ████  ██ ███████    ██    ██    ██ ██████  
     ██    ██       ██  ██   ██ ██  ██ ██ ██ ██ ██ ██   ██    ██    ██    ██ ██  ██  
     ██    ████████ ██   ██  ██     ██ ██ ██  ████ ██   ██    ██     ██████  ██   ██ 
-                                v4.2.6 - Autonomous Engine
+                                v4.2.7 - Autonomous Engine
 `;
 
 const SKILL_NAME = 'solana-terminator';
@@ -94,6 +94,7 @@ function showIdentity() {
             console.log(`ADDRESS : ${status.address}`);
             console.log(`SOL     : ${status.sol.toFixed(4)}`);
             console.log(`USDC    : $${status.usdc.toFixed(2)}`);
+            console.log(`EXPLORER: https://solscan.io/account/${status.address}`);
             console.log(`--------------------------------------------------`);
             pauseAndReturn();
         });
