@@ -21,7 +21,7 @@ const ASCII_ART = `
     ██    ██████   ████████ ████ ████ ██ ████  ██ ███████    ██    ██    ██ ██████  
     ██    ██       ██  ██   ██ ██  ██ ██ ██ ██ ██ ██   ██    ██    ██    ██ ██  ██  
     ██    ████████ ██   ██  ██     ██ ██ ██  ████ ██   ██    ██     ██████  ██   ██ 
-                                v4.1.4 - Solana Autonomy
+                                v4.1.5 - Solana Autonomy
 `;
 
 const SKILL_NAME = 'solana-terminator';
@@ -72,11 +72,39 @@ try {
     // We use --no-save to avoid cluttering a local package-lock if one exists
     execSync('npm install --production --omit=dev', { stdio: 'inherit' });
 
-    console.log(`\n✅ Installation Complete!`);
-    console.log(`--------------------------------------------------`);
-    console.log(`Skill Location: ${TARGET_DIR}`);
-    console.log(`Configuration:  Check ~/.automaton/solana-wallet.json`);
-    console.log(`--------------------------------------------------\n`);
+    // 4. Show Wallet Address
+    console.log(`\n🔍 Checking Agent Identity...`);
+    try {
+        const checkScript = `
+            const { Keypair } = require('@solana/web3.js');
+            const fs = require('fs');
+            const path = require('path');
+            const walletPath = path.join(process.env.HOME || '/root', '.automaton', 'solana-wallet.json');
+            
+            if (fs.existsSync(walletPath)) {
+                const raw = fs.readFileSync(walletPath, 'utf8');
+                const keypair = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(raw)));
+                console.log(keypair.publicKey.toBase58());
+            } else {
+                console.log('NOT_FOUND');
+            }
+        `;
+        const address = execSync(`node -e "${checkScript.replace(/\n/g, '')}"`, { encoding: 'utf8' }).trim();
+
+        console.log(`\n✅ Installation Complete!`);
+        console.log(`--------------------------------------------------`);
+        console.log(`Skill Location : ${TARGET_DIR}`);
+        if (address !== 'NOT_FOUND') {
+            console.log(`Agent Address  : ${address}  👈 FUND THIS ADDRESS`);
+        } else {
+            console.log(`Agent Identity : Will be generated on first agent run.`);
+        }
+        console.log(`Configuration  : Check ~/.automaton/solana-wallet.json`);
+        console.log(`--------------------------------------------------\n`);
+    } catch (e) {
+        console.log(`\n✅ Installation Complete!`);
+        console.log(`(Identity will be shown when the agent starts)`);
+    }
 
 } catch (error) {
     console.error(`\n❌ Installation failed: ${error.message}`);
