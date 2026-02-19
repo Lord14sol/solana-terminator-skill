@@ -64,7 +64,8 @@ npx solana-terminator-skill
 | Category | Methods |
 |----------|---------|
 | **Identity** | `getAddress`, `getSolBalance`, `getUsdcBalance`, `getStatus` |
-| **Survival** | `sendSol(to, amount)` | Send native SOL |
+| **Survival** | `keepAlive` |
+| **Transfers** | `sendSol`, `sendToken` |
 | **DEX** | `swap` (Jupiter Aggregator v6) |
 | **Memecoins** | `pumpBuy`, `pumpSell` (Pump.fun via PumpPortal) |
 | **NFTs** | `buyNft`, `sellNft` (Tensor GraphQL) |
