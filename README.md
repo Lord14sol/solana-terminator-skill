@@ -4,8 +4,7 @@
 
 This skill gives your agent "Solana Hands" and a sophisticated "Life Support" system. Optimized for reliability, speed (Jupiter/Tensor APIs), and security (local signing).
 
-[![Stars](https://img.shields.io/github/stars/Lord14sol/solana-terminator-skill?style=social)](https://github.com/Lord14sol/solana-terminator-skill)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 
 ---
 
