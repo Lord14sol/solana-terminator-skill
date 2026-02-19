@@ -1,0 +1,34 @@
+{
+  "name": "solana-terminator-skill",
+  "version": "4.0.0",
+  "description": "Full Solana toolkit for AI agents. Survival, swaps, memecoins (Pump.fun), staking, transfers, memos, NFTs (Tensor), and liquidity (Meteora).",
+  "main": "solana-autonomy.js",
+  "type": "module",
+  "dependencies": {
+    "@solana/web3.js": "^1.91.0",
+    "@solana/spl-token": "^0.4.6",
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.5"
+  },
+  "optionalDependencies": {
+    "@meteora-ag/dlmm": "^1.9.3",
+    "@coral-xyz/anchor": "^0.30.0",
+    "bn.js": "^5.2.1"
+  },
+  "keywords": [
+    "conway",
+    "automaton",
+    "solana",
+    "web4",
+    "ai-agent",
+    "survival",
+    "jupiter",
+    "pump-fun",
+    "tensor",
+    "meteora",
+    "nft",
+    "staking",
+    "memecoin"
+  ],
+  "license": "MIT"
+}
