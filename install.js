@@ -100,7 +100,8 @@ try {
     } catch (e) {
         console.log(`\n✅ Installation Complete!`);
         console.log(`Skill Location : ${TARGET_DIR}`);
-        console.log(`(Identity check failed: ${e.message}, will generate on first run)`);
+        console.log(`(Identity check failed: ${e.message}, your wallet will be generated on first run)`);
+        console.log(`Manual Check: cat ~/.automaton/solana-wallet.json`);
     }
 
 } catch (error) {

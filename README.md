@@ -1,10 +1,24 @@
-#  Solana Terminator Skill v4.1.9
+# 🤖 Solana Terminator v4.2.1
 
-> **Sovereign Solana Identity & Autonomous Survival Engine for Conway Automaton.**
+### **The Sovereign Autonomous Engine for Solana Agents**
 
-This skill gives your agent "Solana Hands" and a sophisticated "Life Support" system. Optimized for reliability, speed (Jupiter/Tensor APIs), and security (local signing).
+Upgrade your agent with the most tactical toolkit on Solana. Real-time radar, Birdeye intelligence, and Raydium V2 foundations.
 
+---
 
+## 🚀 Quick Start
+
+### 1. Install & Initialize
+```bash
+npx solana-terminator-skill@latest
+```
+*This command sets up your wallet and installs dependencies.*
+
+### 2. Enter the Radar (The Dashboard)
+```bash
+npx radar
+```
+*Launch your Matrix-style tactical terminal to monitor everything in real-time.*
 
 ---
 
