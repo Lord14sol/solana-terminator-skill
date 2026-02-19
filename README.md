@@ -20,12 +20,22 @@ This skill gives your agent "Solana Hands" and a sophisticated "Life Support" sy
 
 ## 🛠 Installation
 
+The fastest way to install is via **npx**:
+
+```bash
+npx solana-terminator-skill
+```
+
+This automates the directory creation, file downloads, and dependency setup.
+
+### Manual Installation (Alternative)
+
 ```bash
 # 1. Create skill directory
 mkdir -p ~/.automaton/skills/solana-terminator
 
-# 2. Download the skill
-# (Copy solana-autonomy.js and SKILL.md to the folder)
+# 2. Download the skill files to that folder
+# (solana-autonomy.js, SKILL.md, package.json)
 
 # 3. Install dependencies
 npm install @solana/web3.js @solana/spl-token axios dotenv bs58
