@@ -1,46 +1,12 @@
 {
   "name": "solana-terminator-skill",
-  "version": "4.2.7",
+  "version": "4.2.8",
   "description": "Full Solana toolkit for AI agents. Install via npx solana-terminator-skill.",
   "main": "solana-autonomy.js",
   "type": "module",
   "bin": {
     "solana-terminator-skill": "install.js",
     "radar": "radar.js"
-  },
-  "dependencies": {
-    "@raydium-io/raydium-sdk-v2": "^0.2.32-alpha",
-    "@solana/spl-token": "^0.4.6",
-    "@solana/web3.js": "^1.91.0",
-    "axios": "^1.13.5",
-    "chalk": "^5.6.2",
-    "dotenv": "^16.4.5",
-    "ws": "^8.19.0"
-  },
-  "optionalDependencies": {
-    "@coral-xyz/anchor": "^0.30.0",
-    "@meteora-ag/dlmm": "^1.9.3",
-    "bn.js": "^5.2.1"
-  },
-  "keywords": [
-    "conway",
-    "automaton",
-    "solana",
-    "web4",
-    "ai-agent",
-    "survival",
-    "jupiter",
-    "pump-fun",
-    "tensor",
-    "meteora",
-    "nft",
-    "staking",
-    "memecoin"
-  ],
-  "author": "Lord14sol",
-  "license": "MIT",
-  "publishConfig": {
-    "access": "public"
   },
   "files": [
     "solana-autonomy.js",
@@ -50,8 +16,32 @@
     "package.json",
     "radar.js"
   ],
-  "homepage": "https://github.com/Lord14sol/solana-terminator-skill#readme",
-  "bugs": {
-    "url": "https://github.com/Lord14sol/solana-terminator-skill/issues"
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.87.6",
+    "@solana/spl-token": "^0.3.9",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "chalk": "^5.3.0",
+    "ws": "^8.14.2",
+    "@raydium-io/raydium-sdk-v2": "^0.1.1"
+  },
+  "keywords": [
+    "solana",
+    "ai",
+    "agent",
+    "terminator",
+    "autonomous",
+    "trading",
+    "dex",
+    "radar"
+  ],
+  "author": "Lord14sol",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lord14sol/solana-terminator-skill.git"
   }
 }

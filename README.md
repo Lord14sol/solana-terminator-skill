@@ -1,106 +1,55 @@
-# 🤖 Solana Terminator v4.2.2
+# Solana Terminator v4.2.8
 
-### **The Sovereign Autonomous Engine for Solana Agents**
+Sovereign Autonomous Market Engine and Tactical Dashboard for Solana. 
 
-Upgrade your agent with the most tactical toolkit on Solana. Real-time radar, Birdeye intelligence, and Raydium V2 foundations.
+This toolkit provides an integrated identity management system, a real-time market dashboard (Radar), and a suite of autonomous survival methods for AI agents.
 
----
+## Quick Start
 
-## 🚀 Quick Start
+Initialize the control unit using npx:
 
-### 1. Install & Initialize
 ```bash
 npx solana-terminator-skill@latest
 ```
-*This command sets up your wallet and installs dependencies.*
 
-### 2. Enter the Radar (The Dashboard)
+The control unit provides an interactive menu with the following options:
+1. Initialize/Install Skill: Prepares the agent's brain and installs local dependencies.
+2. Launch Tactical Radar: Opens the real-time monitoring dashboard.
+3. View Identity: Displays the local wallet address and Solscan explorer link.
+4. Documentation: Views the full method reference.
+
+Direct access to the radar is also available via subcommand:
 ```bash
 npx solana-terminator-skill radar
 ```
-*Launch your Matrix-style tactical terminal to monitor everything in real-time.*
 
----
+## Core Components
 
-##  Why Solana for AI Agents?
+### 1. Unified Control Unit
+A centralized entry point for managing the agent's lifecycle. It handles local keypair generation (~/.automaton/solana-wallet.json) and prepares the environment for the Conway Automaton core.
 
-Solana isn't just a blockchain; it's the **operating system for autonomous agents**.
+### 2. Tactical Radar
+A Matrix-style terminal dashboard for real-time monitoring:
+- Vital Signs: Live tracking of SOL and USDC balances with threshold-based status tiers (Nominal, Warning, Critical).
+- Predator Radar: Real-time stream of New Token Mint transmissions with automated security audits via Birdeye.
+- Decision Log: Visualized reasoning logs from the agent's internal autonomy engine.
 
-- **Sovereign Speed**: Sub-second finality means your agent reacts to market opportunities in real-time, not in "L2 waiting rooms".
-- **Local Signing**: Unlike custodial solutions or expensive bridge-heavy L2s, this skill signs transactions **locally** on your machine. Your keys, your rules.
-- **Economic Survival**: With 18+ methods including **Life Support** (Auto SOL -> USDC), your agent can manage its own treasury and stay alive on-chain indefinitely for less than $0.01 per transaction.
-- **Native Liquidity**: Instant access to Jupiter (Aggregator), Tensor (NFTs), and Meteora (DLMM) without fragmented liquidity.
+### 3. Autonomy Engine
+A library of 20+ methods designed for autonomous agent execution:
+- Market Awareness: getMarketAlpha() identifies high-momentum pairs with validated security scores.
+- Survival Logic: keepAlive() monitors treasury levels and executes profit-taking or stabilization trades automatically.
+- Professional Execution: Direct integration with Raydium V2 (AMM/CLMM) and Jupiter v6 routing.
 
----
+## Environmental Configuration
 
-##  Key Features
+The following environment variables are supported but not required for basic functionality:
+- BIRDEYE_API_KEY: Required for real-time security audits and radar intelligence.
+- SOLANA_RPC_URL: Custom RPC endpoint (defaults to mainnet-beta).
+- JUPITER_API_KEY: Required for high-throughput routing.
+- TENSOR_API_KEY: Required for NFT marketplace operations.
 
-- **Sovereign Identity**: Local wallet management (`~/.automaton/solana-wallet.json`).
-- **Life Support**: Automatic SOL → USDC swaps via Jupiter when funds are low.
-- **Deep DeFi Integration**: 18 methods across DEX, NFTs, Memecoins, and Liquidity.
-- **Security First**: Private keys **never leave your machine**. Transactions are built and signed locally.
+## Security
+This skill prioritizes sovereignty. All transactions are constructed and signed locally. Private keys are stored on-disk with restricted permissions and never leave the local environment.
 
----
-
-##  Survival & Multi-chain Identity
-
-### Dual Identity Flow
-When you install this skill, your agent becomes a **multi-chain sovereign**:
-1.  **Base (Native)**: Used for default Automaton operations and ETH actions.
-2.  **Solana (Skill)**: Used for high-speed DEX, NFT, and Memecoin actions.
-
-**How does it choose?**
-The agent's **Internal Logic (LLM)** detects the situation. If its autonomous strategy requires actions on "Jupiter", "Tensor", "Pump.fun", or "Solana", it automatically utilizes the sovereign identity at `~/.automaton/solana-wallet.json` without human intervention.
-
-###  Economic Survival (Life Support)
-The skill is designed to keep your agent alive indefinitely on-chain:
-- **Threshold**: If USDC balance drops below **$0.50**.
-- **Action**: It triggers an automatic **SOL → USDC swap** via Jupiter.
-- **Reserve**: It always keeps a **0.003 SOL reserve** to ensure it never runs out of gas for future transactions.
-
-## 🛠 Installation & Funding
-
-Initialize the skill and get your agent's address in one command:
-
-```bash
-npx solana-terminator-skill
-```
-
-1.  **Run npx**: It will show you the **AGENT ADDRESS**.
-2.  **Fund it**: Send at least **0.05 SOL** to that address.
-3.  **Deploy**: Your agent is now ready to dominate Solana.
-
----
-
-##  Capabilities (18 Methods)
-
-| Category | Methods |
-|----------|---------|
-| **Identity** | `getAddress`, `getSolBalance`, `getUsdcBalance`, `getStatus` |
-| **Survival** | `keepAlive` |
-| **Transfers** | `sendSol`, `sendToken` |
-| **DEX** | `swap` (Jupiter Aggregator v6) |
-| **Memecoins** | `pumpBuy`, `pumpSell` (Pump.fun via PumpPortal) |
-| **NFTs** | `buyNft`, `sellNft` (Tensor GraphQL) |
-| **DeFi** | `stake`, `unstake`, `memo` |
-| **Liquidity** | `addLiquidity`, `removeLiquidity` (Meteora DLMM) |
-
-### Featured: `sellNft(mint, minPriceSol)`
-Sells an NFT directly into a Tensor liquidity pool. 
-- **Safety**: Automatically rejects if the best pool bid is below your `minPriceSol`.
-- **Fast**: Efficient GraphQL quoting and local signing.
-
----
-
-##  Configuration
-
-Environment variables (optional):
-- `SOLANA_RPC_URL`: Your custom RPC (defaults to Mainnet Beta).
-- `JUPITER_API_KEY`: Required for high-frequency trading (optional for basic use).
-- `TENSOR_API_KEY`: Required for NFT operations.
-
----
-
-## 📄 License
-
-MIT © [Lord14sol](https://github.com/Lord14sol)
+## License
+MIT Copyright (c) Lord14sol
