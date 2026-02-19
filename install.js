@@ -24,7 +24,7 @@ const ASCII_ART = `
     ██    ██████   ████████ ████ ████ ██ ████  ██ ███████    ██    ██    ██ ██████  
     ██    ██       ██  ██   ██ ██  ██ ██ ██ ██ ██ ██   ██    ██    ██    ██ ██  ██  
     ██    ████████ ██   ██  ██     ██ ██ ██  ████ ██   ██    ██     ██████  ██   ██ 
-                                v4.3.0 - Autonomous Engine
+                                v4.3.1 - Autonomous Engine
 `;
 
 const SKILL_NAME = 'solana-terminator';
@@ -35,11 +35,20 @@ const TARGET_DIR = path.join(os.homedir(), '.automaton', 'skills', SKILL_NAME);
 const args = process.argv.slice(2);
 
 if (args.includes('radar')) {
-    import('./radar.js');
+    launchRadar();
 } else if (args.includes('install')) {
     runInstaller();
 } else {
     showMainMenu();
+}
+
+// ─── Logic ─────────────────────────────────────────────────────────────
+
+async function launchRadar() {
+    const { bootstrap } = await import('./radar.js');
+    bootstrap(() => {
+        showMainMenu();
+    });
 }
 
 // ─── Menu System ────────────────────────────────────────────────────────────
@@ -63,7 +72,7 @@ function showMainMenu() {
         rl.close();
         switch (answer.toLowerCase()) {
             case '1': runInstaller(); break;
-            case '2': import('./radar.js'); break;
+            case '2': launchRadar(); break;
             case '3': showIdentity(); break;
             case '4': showDocs(); break;
             case 'x': process.exit(0);
@@ -115,6 +124,7 @@ function pauseAndReturn() {
 // ─── Installer Logic ────────────────────────────────────────────────────────
 
 async function runInstaller() {
+    process.stdout.write('\x1Bc');
     console.log(ASCII_ART);
     console.log(`🤖 Solana Terminator Skill — Initializing...\n`);
 

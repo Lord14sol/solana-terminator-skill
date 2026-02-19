@@ -9,6 +9,7 @@
 import chalk from 'chalk';
 import WebSocket from 'ws';
 import { SolanaAutonomy } from './solana-autonomy.js';
+import readline from 'readline';
 
 const solana = new SolanaAutonomy();
 const green = chalk.green;
@@ -16,6 +17,19 @@ const neon = chalk.cyan;
 const alert = chalk.yellow;
 const critical = chalk.red;
 const dim = chalk.gray;
+
+// ─── State ──────────────────────────────────────────────────────────────────
+
+let status = {
+    sol: 0,
+    usdc: 0,
+    tier: 'NOMINAL',
+    logs: [],
+    mints: []
+};
+
+let intervals = [];
+let wsClient = null;
 
 // ─── UI Helpers ─────────────────────────────────────────────────────────────
 
@@ -31,16 +45,6 @@ function header(text) {
     console.log(chalk.bgBlack.white.bold(`  ${text}  `));
 }
 
-// ─── State ──────────────────────────────────────────────────────────────────
-
-let status = {
-    sol: 0,
-    usdc: 0,
-    tier: 'NOMINAL',
-    logs: [],
-    mints: []
-};
-
 // ─── Rendering ──────────────────────────────────────────────────────────────
 
 async function render() {
@@ -50,9 +54,9 @@ async function render() {
 ██      ██    ██ ██      ██   ██ ████   ██ ██   ██     ██   ██ ██   ██ ██   ██ ██   ██ ██   ██ 
   █████  ██    ██ ██      ███████ ██ ██  ██ ███████     ██████  ███████ ██   ██ ███████ ██████  
       ██ ██    ██ ██      ██   ██ ██  ██ ██ ██   ██     ██   ██ ██   ██ ██   ██ ██   ██ ██   ██ 
- ██████   ██████  ███████ ██   ██ ██   ████ ██   ██     ██   ██ ██   ██ ██████  ██   ██ ██   ██ 
-                                                                             v4.2.7 RADAR
-  `));
+ ██████   ██████  ███████ ██   ██ ██   ████ ██   ██     ██   ██ ██   ██ ██████  ██   ██ ██████  
+                                                                             v4.3.1 RADAR
+    `));
 
     line();
     header('VITAL SIGNS');
@@ -79,7 +83,8 @@ async function render() {
     });
 
     line();
-    process.stdout.write(green('  COMMAND CENTER ACTIVE. REASONING IN PROGRESS... '));
+    console.log(green('  COMMAND CENTER ACTIVE. REASONING IN PROGRESS...'));
+    console.log(dim('  Press [q] to return to menu | [Ctrl+C] to quit'));
 }
 
 // ─── Logic ──────────────────────────────────────────────────────────────────
@@ -96,14 +101,14 @@ async function updateVitals() {
 }
 
 function startWebSocket() {
-    const ws = new WebSocket('wss://pumpportal.fun/api/data');
+    wsClient = new WebSocket('wss://pumpportal.fun/api/data');
 
-    ws.on('open', () => {
-        ws.send(JSON.stringify({ method: 'subscribeNewToken' }));
+    wsClient.on('open', () => {
+        wsClient.send(JSON.stringify({ method: 'subscribeNewToken' }));
         status.logs.push(green('Uplink established with PumpPortal WS.'));
     });
 
-    ws.on('message', async (data) => {
+    wsClient.on('message', async (data) => {
         const payload = JSON.parse(data);
         if (payload.txType === 'create') {
             const security = await solana.auditTokenSecurity(payload.mint);
@@ -121,27 +126,50 @@ function startWebSocket() {
         }
     });
 
-    ws.on('error', (err) => {
+    wsClient.on('error', (err) => {
         status.logs.push(critical(`WebSocket error: ${err.message}`));
     });
 }
 
-// ─── Main Loop ──────────────────────────────────────────────────────────────
+// ─── Entry Point ─────────────────────────────────────────────────────────────
 
-async function bootstrap() {
+export async function bootstrap(onExit) {
     status.logs.push('Initializing Solana Autonomy identity...');
     await updateVitals();
     startWebSocket();
 
-    setInterval(async () => {
+    const interval = setInterval(async () => {
         await updateVitals();
         render();
-    }, 2000); // 2s tick
+    }, 2000);
+    intervals.push(interval);
 
     render();
+
+    // Listen for 'q' to exit
+    readline.emitKeypressEvents(process.stdin);
+    if (process.stdin.isTTY) process.stdin.setRawMode(true);
+
+    const keyListener = (str, key) => {
+        if (key.name === 'q' || (key.ctrl && key.name === 'c')) {
+            // Clean up
+            intervals.forEach(clearInterval);
+            if (wsClient) wsClient.close();
+            process.stdin.removeListener('keypress', keyListener);
+            if (process.stdin.isTTY) process.stdin.setRawMode(false);
+
+            if (key.ctrl && key.name === 'c') {
+                process.exit(0);
+            } else {
+                if (onExit) onExit();
+            }
+        }
+    };
+
+    process.stdin.on('keypress', keyListener);
 }
 
-bootstrap().catch(err => {
-    console.error(critical(`FATAL ERROR: ${err.message}`));
-    process.exit(1);
-});
+// Support direct execution
+if (import.meta.url === `file://${process.argv[1]}`) {
+    bootstrap(() => process.exit(0));
+}
