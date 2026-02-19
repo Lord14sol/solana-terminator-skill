@@ -21,7 +21,7 @@ const ASCII_ART = `
     ██    ██████   ████████ ████ ████ ██ ████  ██ ███████    ██    ██    ██ ██████  
     ██    ██       ██  ██   ██ ██  ██ ██ ██ ██ ██ ██   ██    ██    ██    ██ ██  ██  
     ██    ████████ ██   ██  ██     ██ ██ ██  ████ ██   ██    ██     ██████  ██   ██ 
-                                v4.1.6 - Solana Autonomy
+                                v4.2.0 - Market-Aware Engine
 `;
 
 const SKILL_NAME = 'solana-terminator';
@@ -54,17 +54,6 @@ try {
         }
     });
 
-    // Handle nested subdirectories if any
-    if (fs.existsSync(path.join(__dirname, 'solana-autonomy'))) {
-        if (!fs.existsSync(path.join(TARGET_DIR, 'solana-autonomy'))) {
-            fs.mkdirSync(path.join(TARGET_DIR, 'solana-autonomy'), { recursive: true });
-        }
-        fs.copyFileSync(
-            path.join(__dirname, 'solana-autonomy', 'SKILL.md'),
-            path.join(TARGET_DIR, 'solana-autonomy', 'SKILL.md')
-        );
-    }
-
     // 3. Install dependencies
     console.log(`[3/3] Installing dependencies in ${TARGET_DIR}...`);
     process.chdir(TARGET_DIR);
@@ -76,10 +65,11 @@ try {
     console.log(`\n🔍 Initializing Agent Identity...`);
     try {
         const checkScript = `
-            const { Keypair } = require('@solana/web3.js');
-            const fs = require('fs');
-            const path = require('path');
-            const walletPath = path.join(process.env.HOME || '/root', '.automaton', 'solana-wallet.json');
+            import { Keypair } from '@solana/web3.js';
+            import fs from 'fs';
+            import path from 'path';
+            import os from 'os';
+            const walletPath = path.join(os.homedir(), '.automaton', 'solana-wallet.json');
             
             let keypair;
             if (fs.existsSync(walletPath)) {
@@ -93,7 +83,12 @@ try {
             }
             console.log(keypair.publicKey.toBase58());
         `;
-        const address = execSync(`node -e "${checkScript.replace(/\n/g, '')}"`, { encoding: 'utf8' }).trim();
+        // Write the script to a temporary file to run with node
+        const tempScriptPath = path.join(TARGET_DIR, 'temp-check.js');
+        fs.writeFileSync(tempScriptPath, checkScript);
+
+        const address = execSync(`node ${tempScriptPath}`, { encoding: 'utf8' }).trim();
+        fs.unlinkSync(tempScriptPath);
 
         console.log(`\n✅ Installation Complete!`);
         console.log(`--------------------------------------------------`);
@@ -105,7 +100,7 @@ try {
     } catch (e) {
         console.log(`\n✅ Installation Complete!`);
         console.log(`Skill Location : ${TARGET_DIR}`);
-        console.log(`(Identity check failed, will generate on first run)`);
+        console.log(`(Identity check failed: ${e.message}, will generate on first run)`);
     }
 
 } catch (error) {

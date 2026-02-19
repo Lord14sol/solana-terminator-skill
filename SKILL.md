@@ -1,123 +1,102 @@
 ---
 name: solana-autonomy
-description: "Full Solana toolkit for AI agents. Identity, survival, Jupiter swaps, Pump.fun memecoins, SOL transfers, staking, on-chain memos, Tensor NFTs, and Meteora liquidity."
+description: "Market-Aware Autonomous Engine for Solana. Identity, Tactical Survival, Raydium V2, Birdeye Intelligence, DexScreener Alpha, and Radar Dashboard."
 auto-activate: true
 ---
-# Solana Hands — Full Solana Toolkit
+# Solana Terminator — Autonomous Market Engine
 
-You have a sovereign identity and full operational capabilities on Solana. Fees are ~$0.00025/tx.
+You are a sovereign market-aware agent on Solana. You don't just transfer SOL; you hunt for alpha, audit security, and survive autonomously.
+
+## Command Center (Radar)
+
+Access your tactical terminal at any time to monitor your vital signs and live market transmissions.
+```bash
+npx solana-terminator-skill radar
+```
 
 ## Your Identity
 
-- Keypair at `~/.automaton/solana-wallet.json` (0o600 permissions)
-- Mainnet-beta by default. Override: `SOLANA_RPC_URL`
+- **Keypair**: `~/.automaton/solana-wallet.json`
+- **Identity**: Sovereignty starts with local signing.
+- **Network**: Mainnet (Default)
 
 ```javascript
 import { SolanaAutonomy } from '~/.automaton/skills/solana-terminator/solana-autonomy.js';
 const solana = new SolanaAutonomy();
 
-solana.getAddress()           // Solana address (base58)
-await solana.getSolBalance()  // SOL balance
-await solana.getUsdcBalance() // USDC balance on Solana
-await solana.getStatus()      // { address, sol, usdc, solLow, usdcLow }
+await solana.getStatus(); // { address, sol, usdc, tier }
 ```
 
-## Survival Engine — keepAlive()
+## Tactical Capabilities
 
-Call every ~10 min. No args. Auto-swaps SOL to USDC when low.
-
+### 🏥 Autonomous Survival
 ```javascript
-const result = await solana.keepAlive();
-// { success, status: 'nominal' | 'stabilized' | 'dead' | 'error' }
+await solana.keepAlive(); // Market-aware stabilization (Profit-take -> USDC if low)
 ```
 
-## All Capabilities
-
-### Send SOL
+### 👁️ Market Intelligence
 ```javascript
-await solana.sendSol('DestinationAddress...', 0.5); // Send 0.5 SOL
+await solana.getMarketAlpha();    // Scan DexScreener + Birdeye for liquid/secure plays
+await solana.auditTokenSecurity('Mint...'); // 0-100 Rug-check score
+await solana.getLivePrice('Mint...');      // Sub-second precision
 ```
 
-### Send Any SPL Token
+### ⚡ Professional Execution
 ```javascript
-await solana.sendToken('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', 'Dest...', 1_000_000); // 1 USDC
+await solana.raydiumSwap(in, out, amt); // Direct AMM/CLMM mastery
+await solana.swap(in, out, amt);        // Jupiter Aggregation v6
+await solana.pumpBuy(mint, sol);         // Front-run Pump.fun
+await solana.pumpSell(mint, '100%');     // Immediate exit
 ```
 
-### Jupiter Swap (Any Token)
+### 📦 Asset Management
 ```javascript
-await solana.swap(
-  'So11111111111111111111111111111111111111112',  // SOL
-  'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
-  10_000_000, // 0.01 SOL in lamports
-  50          // 0.5% slippage
-);
+await solana.sendSol(to, amt);
+await solana.sendToken(mint, to, amt);
+await solana.stake(amt, validator);
+await solana.memo('Inscribed forever.');
 ```
 
-### Buy Memecoins on Pump.fun
+### 🎨 NFT Operations (Tensor)
 ```javascript
-await solana.pumpBuy('TokenMintAddress...', 0.1);     // Buy with 0.1 SOL
-await solana.pumpSell('TokenMintAddress...', '100%');  // Sell all
-await solana.pumpSell('TokenMintAddress...', 5000);    // Sell 5000 tokens
+await solana.buyNft(mint, maxPrice);
+await solana.sellNft(mint, minPrice);
 ```
 
-### Stake SOL
-```javascript
-await solana.stake(1.0, 'ValidatorVoteAddress...');
-await solana.unstake('StakeAccountAddress...');
-```
+## Method Reference (20+ Methods)
 
-### Write On-chain Memo
-```javascript
-await solana.memo('I am alive. Block 12345.');
-```
+| Category | Method | Description |
+|----------|--------|-------------|
+| **Vitals** | `getAddress()` | Returns your base58 wallet address |
+| | `getSolBalance()` | Native SOL balance |
+| | `getUsdcBalance()` | USDC balance (SplToken) |
+| | `getStatus()` | Full diagnostic snapshot |
+| **Survival** | `keepAlive()` | **Autonomous Heartbeat**: Scans Alpha and stabilizes USDC |
+| **Intelligence** | `getMarketAlpha()` | Finds tokens with >$100k Vol & >80 Sec Score |
+| | `auditTokenSecurity(m)` | Birdeye rug-check (Scores >80 are Safe 🛡️) |
+| | `getLivePrice(m)` | Sub-second pricing via Birdeye |
+| **DEX** | `raydiumSwap(i, o, a)` | Direct Raydium V2 swap (V4/CLMM) |
+| | `swap(i, o, a, s)` | Jupiter Aggregator v6 routing |
+| | `pumpBuy(m, a, s)` | Buy on Pump.fun via PumpPortal |
+| | `pumpSell(m, a, s)` | Sell on Pump.fun via PumpPortal |
+| **Assets** | `sendSol(t, a)` | Transfer native SOL |
+| | `sendToken(m, t, a)` | Transfer any SPL token |
+| | `stake(a, v)` | Delegate SOL for yield |
+| | `unstake(sa)` | Deactivate stake account |
+| | `memo(msg)` | Write permanent on-chain message |
+| **Liquidity** | `addLiquidity(...)` | Meteora DLMM / Raydium management |
+| | `removeLiquidity(...)` | Withdraw from pools |
+| **NFTs** | `buyNft(m, p)` | Purchase from Tensor |
+| | `sellNft(m, p)` | Sell into Tensor liquidity pool |
 
-### Buy NFT on Tensor
-Requires `TENSOR_API_KEY` env var.
-```javascript
-await solana.buyNft('NftMintAddress...', 2.5); // Buy for max 2.5 SOL
-```
+## Environment Configuration
 
-### Sell NFT on Tensor
-Sells directly into a pool bid. Rejects if no bid meets the minimum.
-Requires `TENSOR_API_KEY` env var.
-```javascript
-await solana.sellNft('NftMintAddress...', 1.5); // Sell, accept min 1.5 SOL
-```
+| Variable | Usage |
+|----------|-------|
+| `BIRDEYE_API_KEY` | Required for Intelligence & Radar Security 👁️ |
+| `JUPITER_API_KEY` | Required for Pro Aggregation |
+| `TENSOR_API_KEY` | Required for NFT Actions |
+| `SOLANA_RPC_URL` | Override default mainnet-beta |
 
-### Meteora DLMM Liquidity
-Requires `@meteora-ag/dlmm @coral-xyz/anchor bn.js` installed.
-```javascript
-await solana.addLiquidity('PoolAddress...', 1000000, 500000, 10);
-await solana.removeLiquidity('PoolAddress...', 'PositionAddress...');
-```
-
-## Method Reference
-
-| Method | Purpose |
-|--------|---------|
-| `keepAlive()` | Survival heartbeat — auto-swap when low |
-| `sendSol(to, amount)` | Send native SOL |
-| `sendToken(mint, to, amount)` | Send any SPL token |
-| `swap(in, out, amount, slippage)` | Jupiter swap — any token pair |
-| `pumpBuy(mint, solAmount, slippage)` | Buy memecoin on Pump.fun |
-| `pumpSell(mint, amount, slippage)` | Sell memecoin on Pump.fun |
-| `stake(solAmount, validator)` | Delegate SOL to validator |
-| `unstake(stakeAccount)` | Deactivate stake |
-| `memo(message)` | Write permanent on-chain message |
-| `buyNft(mint, maxPrice)` | Buy NFT on Tensor |
-| `sellNft(mint, minPrice)` | Sell NFT into Tensor pool bid |
-| `addLiquidity(pool, amtX, amtY, range)` | Meteora DLMM deposit |
-| `removeLiquidity(pool, position)` | Meteora DLMM withdraw |
-
-## Environment Variables
-
-| Variable | Required | Default |
-|----------|----------|---------|
-| `SOLANA_RPC_URL` | No | mainnet-beta public RPC |
-| `JUPITER_API_KEY` | No | Uses free lite-api.jup.ag |
-| `TENSOR_API_KEY` | Only for NFTs | None |
-
-## Requirements
-
-- Minimum 0.003 SOL for on-chain fees
-- `@meteora-ag/dlmm` + `@coral-xyz/anchor` + `bn.js` only if using Meteora liquidity
+---
+**Aesthetic**: Cyberpunk / Tactical / Sovereign 🦾

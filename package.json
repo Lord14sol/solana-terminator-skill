@@ -1,21 +1,25 @@
 {
   "name": "solana-terminator-skill",
-  "version": "4.1.6",
+  "version": "4.2.0",
   "description": "Full Solana toolkit for AI agents. Install via npx solana-terminator-skill.",
   "main": "solana-autonomy.js",
   "type": "module",
   "bin": {
-    "solana-terminator-skill": "install.js"
+    "solana-terminator-skill": "install.js",
+    "radar": "radar.js"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.91.0",
+    "@raydium-io/raydium-sdk-v2": "^0.2.32-alpha",
     "@solana/spl-token": "^0.4.6",
-    "axios": "^1.6.7",
-    "dotenv": "^16.4.5"
+    "@solana/web3.js": "^1.91.0",
+    "axios": "^1.13.5",
+    "chalk": "^5.6.2",
+    "dotenv": "^16.4.5",
+    "ws": "^8.19.0"
   },
   "optionalDependencies": {
-    "@meteora-ag/dlmm": "^1.9.3",
     "@coral-xyz/anchor": "^0.30.0",
+    "@meteora-ag/dlmm": "^1.9.3",
     "bn.js": "^5.2.1"
   },
   "keywords": [
@@ -44,7 +48,7 @@
     "SKILL.md",
     "README.md",
     "package.json",
-    "solana-autonomy/SKILL.md"
+    "radar.js"
   ],
   "homepage": "https://github.com/Lord14sol/solana-terminator-skill#readme",
   "bugs": {
