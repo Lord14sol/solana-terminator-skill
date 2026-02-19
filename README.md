@@ -9,6 +9,17 @@ This skill gives your agent "Solana Hands" and a sophisticated "Life Support" sy
 
 ---
 
+## 🚀 Why Solana for AI Agents?
+
+Solana isn't just a blockchain; it's the **operating system for autonomous agents**.
+
+- **Sovereign Speed**: Sub-second finality means your agent reacts to market opportunities in real-time, not in "L2 waiting rooms".
+- **Local Signing**: Unlike custodial solutions or expensive bridge-heavy L2s, this skill signs transactions **locally** on your machine. Your keys, your rules.
+- **Economic Survival**: With 18+ methods including **Life Support** (Auto SOL -> USDC), your agent can manage its own treasury and stay alive on-chain indefinitely for less than $0.01 per transaction.
+- **Native Liquidity**: Instant access to Jupiter (Aggregator), Tensor (NFTs), and Meteora (DLMM) without fragmented liquidity.
+
+---
+
 ## 🌟 Key Features
 
 - **Sovereign Identity**: Local wallet management (`~/.automaton/solana-wallet.json`).
@@ -20,13 +31,13 @@ This skill gives your agent "Solana Hands" and a sophisticated "Life Support" sy
 
 ## 🛠 Installation
 
-The fastest way to install is via **npx**:
+The fastest way to initialize the skill is via **npx**:
 
 ```bash
 npx solana-terminator-skill
 ```
 
-This automates the directory creation, file downloads, and dependency setup.
+This automates the setup in your `~/.automaton/skills` directory, installs dependencies, and prepares the skill for immediate use.
 
 ### Manual Installation (Alternative)
 
