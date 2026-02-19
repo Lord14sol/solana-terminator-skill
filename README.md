@@ -1,4 +1,4 @@
-# 🤖 Solana Terminator Skill v4.1.9
+#  Solana Terminator Skill v4.1.9
 
 > **Sovereign Solana Identity & Autonomous Survival Engine for Conway Automaton.**
 
@@ -9,7 +9,7 @@ This skill gives your agent "Solana Hands" and a sophisticated "Life Support" sy
 
 ---
 
-## 🚀 Why Solana for AI Agents?
+##  Why Solana for AI Agents?
 
 Solana isn't just a blockchain; it's the **operating system for autonomous agents**.
 
@@ -20,7 +20,7 @@ Solana isn't just a blockchain; it's the **operating system for autonomous agent
 
 ---
 
-## 🌟 Key Features
+##  Key Features
 
 - **Sovereign Identity**: Local wallet management (`~/.automaton/solana-wallet.json`).
 - **Life Support**: Automatic SOL → USDC swaps via Jupiter when funds are low.
@@ -29,7 +29,7 @@ Solana isn't just a blockchain; it's the **operating system for autonomous agent
 
 ---
 
-## 🧬 Survival & Multi-chain Identity
+##  Survival & Multi-chain Identity
 
 ### Dual Identity Flow
 When you install this skill, your agent becomes a **multi-chain sovereign**:
@@ -39,7 +39,7 @@ When you install this skill, your agent becomes a **multi-chain sovereign**:
 **How does it choose?**
 The agent's **Internal Logic (LLM)** detects the situation. If its autonomous strategy requires actions on "Jupiter", "Tensor", "Pump.fun", or "Solana", it automatically utilizes the sovereign identity at `~/.automaton/solana-wallet.json` without human intervention.
 
-### 🛠 Economic Survival (Life Support)
+###  Economic Survival (Life Support)
 The skill is designed to keep your agent alive indefinitely on-chain:
 - **Threshold**: If USDC balance drops below **$0.50**.
 - **Action**: It triggers an automatic **SOL → USDC swap** via Jupiter.
@@ -59,7 +59,7 @@ npx solana-terminator-skill
 
 ---
 
-## 🚀 Capabilities (18 Methods)
+##  Capabilities (18 Methods)
 
 | Category | Methods |
 |----------|---------|
@@ -79,7 +79,7 @@ Sells an NFT directly into a Tensor liquidity pool.
 
 ---
 
-## ⚙️ Configuration
+##  Configuration
 
 Environment variables (optional):
 - `SOLANA_RPC_URL`: Your custom RPC (defaults to Mainnet Beta).
