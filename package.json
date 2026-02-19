@@ -1,6 +1,6 @@
 {
   "name": "solana-terminator-skill",
-  "version": "4.2.8",
+  "version": "4.2.9",
   "description": "Full Solana toolkit for AI agents. Install via npx solana-terminator-skill.",
   "main": "solana-autonomy.js",
   "type": "module",
@@ -26,7 +26,7 @@
     "dotenv": "^16.3.1",
     "chalk": "^5.3.0",
     "ws": "^8.14.2",
-    "@raydium-io/raydium-sdk-v2": "^0.1.1"
+    "@raydium-io/raydium-sdk-v2": "0.2.32-alpha"
   },
   "keywords": [
     "solana",
