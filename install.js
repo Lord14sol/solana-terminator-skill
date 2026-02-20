@@ -29,7 +29,7 @@ const ASCII_ART = `
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                v4.3.12 - Neural Predator
+                                v4.3.13 - Neural Predator
 `;
 
 const SKILL_NAME = 'solana-terminator';

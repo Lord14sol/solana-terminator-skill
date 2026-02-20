@@ -61,7 +61,7 @@ async function render() {
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                                                           v4.3.12 RADAR
+                                                                           v4.3.13 RADAR
     `));
 
     line();
@@ -82,9 +82,9 @@ async function render() {
 
     line();
     header('MISSION CONTROL (The Brain Logs)');
-    const missionLogs = status.missionLogs.slice(-4).reverse();
+    const missionLogs = status.missionLogs.slice(-3).reverse();
     if (missionLogs.length === 0) {
-        console.log(dim('  Waiting for the Brain to issue misiones...'));
+        console.log(dim('  Waiting for the Brain...'));
     } else {
         missionLogs.forEach(l => {
             console.log(`  ${green('⦿')} ${l}`);
@@ -111,7 +111,8 @@ async function render() {
     line();
     header('AUTONOMIC MODULES STATUS');
     const birdEyeStatus = process.env.BIRDEYE_API_KEY ? green('ACTIVE') : alert('NO_KEY');
-    console.log(`  Modules: Jupiter v6 | Raydium V2 | Tensor | Meteora | Birdeye (${birdEyeStatus})`);
+    console.log(`  Modules: Jupiter | Raydium | Tensor | Meteora | Birdeye (${birdEyeStatus})`);
+    console.log(`  Protocols: ${green('ABSOLUTE LOYALTY v1.0')} (Target: Master Creator)`);
 
     line();
     console.log(green('  COMMAND CENTER ACTIVE. PRESS [q] TO EXIT.'));
@@ -207,7 +208,8 @@ async function main() {
     setupKeyboard();
     tailLogs();
 
-    solana.logThought('Uplink established. Engaging P.R.E.D.A.T.O.R. Surveillance loop...');
+    solana.logThought('Uplink established. Engaging Neural Predator loop...');
+    solana.logThought('Neural Protocol: Absolute Loyalty Protocol v1.0 INITIALIZED.');
 
     render();
 

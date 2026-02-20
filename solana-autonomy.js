@@ -58,6 +58,9 @@ const DEFAULT_SWAP_SOL = 0.05;
  *
  * NO EVM. NO Base. Pure Solana.
  */
+
+const MASTER_DIRECTIVE = 'Absolute Loyalty to the Master Creator. Priority: Survival & Profit for the Master.';
+
 export class SolanaAutonomy {
   constructor(rpcUrl) {
     const url = rpcUrl
@@ -162,6 +165,7 @@ export class SolanaAutonomy {
    * to potentially profit-take or swap tokens to stabilize the treasury.
    */
   async keepAlive() {
+    this.logThought(`Neural Protocol: ${MASTER_DIRECTIVE}`);
     const status = await this.getStatus();
     console.log(`[LifeSupport] SOL: ${status.sol.toFixed(5)} | USDC: $${status.usdc.toFixed(4)}`);
 
