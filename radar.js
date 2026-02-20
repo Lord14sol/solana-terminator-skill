@@ -62,7 +62,7 @@ async function render() {
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                                                           v4.8.6 RADAR
+                                                                           v4.9.0 RADAR
     `));
 
     line();
@@ -112,6 +112,17 @@ async function render() {
             console.log(`  [${dim(m.time)}] ${neon(m.symbol.padEnd(8))} | ${secBadge} | ${dim(m.mint.slice(0, 16))}`);
         });
     }
+
+    line();
+    header('TACTICAL ARSENAL');
+    const tensorStatus = process.env.TENSOR_API_KEY ? green('[ARMED]') : dim('[STANDBY]');
+    const meteoraStatus = green('[ARMED]'); // DLMM is included in core
+    const raydiumStatus = green('[ARMED]'); // Raydium is included in core
+
+    console.log(`  DEX Engine (Jupiter/Raydium) : ${raydiumStatus}`);
+    console.log(`  NFT Engine (Tensor)          : ${tensorStatus}`);
+    console.log(`  LP Engine (Meteora)          : ${meteoraStatus}`);
+    console.log(`  Pump Scanner (PumpPortal)    : ${green('[ACTIVE]')}`);
 
     line();
     header('AUTONOMOUS MODULES');

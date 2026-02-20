@@ -34,7 +34,7 @@ const ASCII_ART = `
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                v4.8.6 - Hardened Architecture
+                                v4.9.0 - Sovereign Arsenal
 `;
 
 // ─── Interactive State ──────────────────────────────────────────────────────
@@ -43,13 +43,13 @@ let selectedIndex = 0;
 let isMenuMode = true;
 
 const menuOptions = [
-    { label: 'Reset/Install Identity (Wallet)', action: () => runInstaller() },
-    { label: 'Launch Radar (Autonomous Monitor)', action: () => launchRadar(false) },
-    { label: 'View Balance & Identity', action: () => showIdentity() },
-    { label: 'Configure Pro Intel (Optional API)', action: () => configureApi() },
-    { label: 'Set Master Vault Address (Tribute)', action: () => configureMaster() },
-    { label: 'Configure Custom RPC URL', action: () => configureRpc() },
-    { label: 'Exit Engine', action: () => process.exit(0) }
+    { label: 'Initialize Sovereign Identity (Wallet)', action: () => runInstaller() },
+    { label: 'Engage Tactical Radar (Autonomous Monitor)', action: () => launchRadar(false) },
+    { label: 'Inspect Sovereign Vital Signs (Identity)', action: () => showIdentity() },
+    { label: 'Configure Pro Intel (Birdeye API)', action: () => configureApi() },
+    { label: 'Designate Master Vault (Tribute Logic)', action: () => configureMaster() },
+    { label: 'Set Tactical RPC Uplink (Custom URL)', action: () => configureRpc() },
+    { label: 'Disengage Engine', action: () => process.exit(0) }
 ];
 
 // ─── Rendering ──────────────────────────────────────────────────────────────
