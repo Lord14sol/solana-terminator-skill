@@ -1,58 +1,71 @@
-# P.R.E.D.A.T.O.R. — Sovereign Commercial Brain (v4.8.6)
+# P.R.E.D.A.T.O.R. Sovereign Commercial Brain (v4.9.0)
 
-"In Web 4.0, if an agent doesn't generate value, it doesn't exist."
+In Web 4.0, if an agent does not generate value, it does not exist.
 
-P.R.E.D.A.T.O.R. is not just a tool; it is a **Sovereign Commercial Automaton** designed to live on Solana and harvest profit for its Master Creator. It is built for a world where AI agents are the primary economic actors.
+P.R.E.D.A.T.O.R. (Passive Revenue Ecosystem and Deployment of Autonomous Tactical Operations Radar) is a Sovereign Commercial Automaton designed to live on the Solana blockchain and harvest profit for its Master Creator. It operates as a native skill within the Conway Research Automaton ecosystem.
 
-## 🛡️ Hardened Architecture (v4.8.x)
+## Full Tactical Arsenal (v4.9.0)
 
-The v4.8.x series introduces industrial-grade hardening to ensure execution fidelity and asset safety:
+The v4.9.0 release consolidates several high-fidelity modules into a single unified execution engine:
 
-1.  **Null-Safe RPC Logic**: Core balance methods return `null` on network errors instead of `0`, preventing false panic trades during RPC turbulence.
-2.  **Shell-Safe Execution**: Resolved DEP0190 by eliminating shell concatenation and using direct process spawning for immutable security.
-3.  **TTY Pinning**: Interactivity layer refactored with asynchronous Promises and a safety buffer to ensure mission-critical UI stability.
-4.  **Tactical Metabolism**: Growth phases are gated behind a strict stabilization-first protocol (SOL/USDC parity).
-5.  **Executable Tribute**: Fully integrated SPL-token transfer logic for autonomous profit redirection.
+- DEX Engine: Optimized swaps via Jupiter V6 and Raydium V2 (CLMM/AMM).
+- NFT Engine: Professional sniping and floor-sweeping via Tensor.
+- LP Engine: Yield generation and liquidity management via Meteora DLMM.
+- Pump Scanner: Real-time transmission monitoring via PumpPortal.
+- Audit Engine: 0-100 security scoring via Birdeye Pro Intelligence.
 
-## 🧠 Core Philosophy: Value-Driven Existence
+## Core Functionality
 
-The P.R.E.D.A.T.O.R. engine is governed by a singular objective: **Autonomous Profit Harvesting.**
+The engine is governed by a singular objective: Autonomous Value Extraction.
 
-1.  **Sovereign Identity**: Generates and manages its own Solana identity (`~/.automaton/solana-wallet.json`).
-2.  **Tactical Metabolism**: Earns its own SOL fuel and USDC reserves via market-aware loops.
-3.  **Tribute Protocol**: Automatically redirects excess profits to a designated Master Vault.
-4.  **Absolute Loyalty**: Hardcoded directives ensure every autonomous action serves the Master's financial interest.
+1. Sovereign Identity: The agent generates and manages its own unique Solana identity (wallet) located at ~/.automaton/solana-wallet.json.
+2. Tactical Metabolism: The engine autonomously manages its own fuel (SOL) and operating capital (USDC) to ensure 100% uptime.
+3. Exceed Profit Protocol: Every cent of profit exceeding the survival threshold is automatically harvested and redirected to the designated Master Vault.
+4. Rug-Resilience: Automated audit loops filter out malicious tokens and risky pools using real-time security data.
 
-## 🚀 Deployment
+## Deployment and Setup
 
-The engine can be deployed instantly via NPX:
+The engine is distributed via NPX for instant deployment within any standard terminal environment.
+
+### 1. Initialization
+Run the following command to deploy the P.R.E.D.A.T.O.R. core files and initialize the Sovereign Identity.
 
 ```bash
 npx clear-npx-cache
 npx solana-terminator-skill@latest
 ```
 
-## 🛰️ Tactical Radar
+### 2. Configuration
+Follow the interactive menu to finalize the setup:
+- Initialize Sovereign Identity: Create and encrypt the agent wallet.
+- Designate Master Vault: Set the Solana address where excess profits will be sent.
+- Configure Pro Intel: (Optional) Input your Birdeye API key for enhanced security audits.
+- Set Tactical RPC Uplink: (Optional) Provide a custom Solana RPC URL for faster transaction confirmation.
 
-Monitor the engine's neural state and market surveillance in real-time:
+### 3. Monitoring
+Launch the Tactical Radar to monitor the neural state and market surveillance in real-time.
 
 ```bash
 npx solana-terminator-skill radar
 ```
 
+## Environment Variables
+
+For advanced configurations, the following environment variables can be set:
+- MASTER_WALLET: The recipient address for the Exceed Profit protocol.
+- BIRDEYE_API_KEY: Required for professional security auditing.
+- TENSOR_API_KEY: Required for NFT-based sniping operations.
+- SOLANA_RPC_URL: Custom endpoint for blockchain interaction.
+
+## Hardened Architecture
+
+- Null-Safe RPC Logic: Prevents false trades by returning null on network errors.
+- Shell-Safe Execution: DEP0190 compliant process spawning via process.execPath.
+- TTY Pinning: Asynchronous input isolation for terminal UI stability.
+
 ---
 
-## 🛠️ Technical Fixes (v4.8.x Audit)
-
-- **Fix #1**: Executable Profit Harvesting (Verified SPL Transfers).
-- **Fix #2**: Corrected DexScreener v2 API integration for Solana pairs.
-- **Fix #3**: Numeric Security Scoring (0-100) for Rug-Resilience.
-- **Fix #4**: Robust RPC error handling with null-safety.
-- **Fix #5**: Stabilization-First priority gating for treasury survival.
-- **Fix #6**: DEP0190 Shell-Safe spawning in the installer.
-- **Fix #7**: TTY/Keyboard buffer stabilization for UI pinning.
-
----
-
-**Built for the Conway Research Automaton ecosystem.**
-**Verified by Antigravity AI.**
+Built for the Conway Research Automaton ecosystem.
+Verified by Antigravity AI.
+All operations are executed on the Solana Mainnet.
+Use with caution.
