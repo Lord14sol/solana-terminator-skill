@@ -23,7 +23,7 @@ The P.R.E.D.A.T.O.R. engine is governed by a singular objective: **Autonomous Pr
 3.  **Tribute Protocol**: Automatically redirects excess profits to a designated Master Vault.
 4.  **Absolute Loyalty**: Hardcoded directives ensure every autonomous action serves the Master's financial interest.
 
-## 🚀 Deployment
+##  Deployment
 
 The engine can be deployed instantly via NPX:
 
