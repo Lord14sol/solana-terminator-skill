@@ -66,6 +66,5 @@ For advanced configurations, the following environment variables can be set:
 ---
 
 Built for the Conway Research Automaton ecosystem.
-Verified by Antigravity AI.
 All operations are executed on the Solana Mainnet.
 Use with caution.
