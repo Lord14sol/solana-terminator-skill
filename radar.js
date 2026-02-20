@@ -62,13 +62,15 @@ async function render() {
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                                                           v4.8.3 RADAR
+                                                                           v4.8.4 RADAR
     `));
 
     line();
     header('VITAL SIGNS');
     const tierColor = status.tier === 'NOMINAL' ? green : (status.tier === 'WARNING' ? alert : critical);
-    console.log(`  SOL: ${neon(status.sol.toFixed(4))} | USDC: ${neon('$' + status.usdc.toFixed(2))} | TIER: ${tierColor.bold(status.tier)}`);
+    const solStr = status.sol !== null ? status.sol.toFixed(4) : '---';
+    const usdcStr = status.usdc !== null ? ('$' + status.usdc.toFixed(2)) : '---';
+    console.log(`  SOL: ${neon(solStr)} | USDC: ${neon(usdcStr)} | TIER: ${tierColor.bold(status.tier)}`);
 
     line();
     header('NEURAL REFLECTION (Internal Reasoning)');

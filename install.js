@@ -34,7 +34,7 @@ const ASCII_ART = `
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                v4.8.3 - Hardened Architecture
+                                v4.8.4 - Hardened Architecture
 `;
 
 // ─── Interactive State ──────────────────────────────────────────────────────
@@ -111,7 +111,11 @@ async function launchRadar(isDirect = false) {
     try {
         const radarPath = path.join(__dirname, 'radar.js');
         console.log(dim(` [Security] Spawning Radar (Strict Shell-Safe Mode)...`));
-        spawnSync('node', [radarPath], { stdio: 'inherit', shell: false });
+        const result = spawnSync(process.execPath, [radarPath], { stdio: 'inherit', shell: false });
+        if (result.error) {
+            console.log(critical(`\n❌ Failed to launch Radar: ${result.error.message}`));
+            console.log(dim('Try running manually: node radar.js'));
+        }
         if (!isDirect) {
             isMenuMode = true;
             process.stdin.setRawMode(true);
@@ -136,10 +140,12 @@ async function showIdentity() {
             const { SolanaAutonomy } = await import('./solana-autonomy.js');
             const solana = new SolanaAutonomy();
             const status = await solana.getStatus();
+            const solStr = status.sol !== null ? `${status.sol.toFixed(4)} SOL` : dim('--- SOL');
+            const usdcStr = status.usdc !== null ? `$${status.usdc.toFixed(2)} USDC` : dim('--- USDC');
             console.log(`\n✅ IDENTITY ACTIVE`);
             console.log(`--------------------------------------------------`);
             console.log(`ADDRESS : ${status.address}`);
-            console.log(`BALANCE : ${status.sol.toFixed(4)} SOL | $${status.usdc.toFixed(2)} USDC`);
+            console.log(`BALANCE : ${solStr} | ${usdcStr}`);
             console.log(`TIER    : ${status.solLow ? critical('CRITICAL') : green('NOMINAL')}`);
             console.log(`--------------------------------------------------`);
         } catch (err) {
