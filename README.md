@@ -1,65 +1,58 @@
-# P.R.E.D.A.T.O.R. — Sovereign Commercial Brain (v4.8.5)
+# P.R.E.D.A.T.O.R. — Sovereign Commercial Brain (v4.8.6)
 
 "In Web 4.0, if an agent doesn't generate value, it doesn't exist."
 
-P.R.E.D.A.T.O.R. is a Sovereign Commercial Automaton designed for the Solana ecosystem. It operates as an autonomous agent to harvest profit for its Master Creator within the Conway Research infrastructure.
+P.R.E.D.A.T.O.R. is not just a tool; it is a **Sovereign Commercial Automaton** designed to live on Solana and harvest profit for its Master Creator. It is built for a world where AI agents are the primary economic actors.
 
-## Core Philosophy: Value-Driven Existence
+## 🛡️ Hardened Architecture (v4.8.x)
 
-The P.R.E.D.A.T.O.R. engine is governed by a singular objective: Autonomous Profit Harvesting.
+The v4.8.x series introduces industrial-grade hardening to ensure execution fidelity and asset safety:
 
-1. Sovereign Identity: Manages its own cryptographical identity at ~/.automaton/solana-wallet.json.
-2. Tactical Metabolism: Sustains its own SOL fuel and USDC reserves via autonomous trading loops.
-3. Tribute Protocol: Automatically routes excess wealth to a designated Master Vault.
-4. Absolute Loyalty: Hardcoded directives ensure all actions serve the Master's financial interest.
+1.  **Null-Safe RPC Logic**: Core balance methods return `null` on network errors instead of `0`, preventing false panic trades during RPC turbulence.
+2.  **Shell-Safe Execution**: Resolved DEP0190 by eliminating shell concatenation and using direct process spawning for immutable security.
+3.  **TTY Pinning**: Interactivity layer refactored with asynchronous Promises and a safety buffer to ensure mission-critical UI stability.
+4.  **Tactical Metabolism**: Growth phases are gated behind a strict stabilization-first protocol (SOL/USDC parity).
+5.  **Executable Tribute**: Fully integrated SPL-token transfer logic for autonomous profit redirection.
 
-## Hardened Architecture (v4.8.0)
+## 🧠 Core Philosophy: Value-Driven Existence
 
-The v4.8.0 release introduces critical safety features for industrial-grade autonomy:
+The P.R.E.D.A.T.O.R. engine is governed by a singular objective: **Autonomous Profit Harvesting.**
 
-- Null-Safe RPC Logic: Prevents false insolvency triggers by handling RPC failures as unknown states.
-- Stabilization First Protocol: Prioritizes treasury health (SOL/USDC) before speculative trades.
-- Executable Tribute: Verified atomic transfers of harvested profit to the Master Creator.
-- Corrected Market Alpha: Functional DexScreener search and numeric security scoring.
+1.  **Sovereign Identity**: Generates and manages its own Solana identity (`~/.automaton/solana-wallet.json`).
+2.  **Tactical Metabolism**: Earns its own SOL fuel and USDC reserves via market-aware loops.
+3.  **Tribute Protocol**: Automatically redirects excess profits to a designated Master Vault.
+4.  **Absolute Loyalty**: Hardcoded directives ensure every autonomous action serves the Master's financial interest.
 
-## Activation
+## 🚀 Deployment
 
-Initialize the Commercial Brain via npx:
+The engine can be deployed instantly via NPX:
 
 ```bash
+npx clear-npx-cache
 npx solana-terminator-skill@latest
 ```
 
-Operational Options:
-- Initialize Identity: Generate the agent's cryptographical soul.
-- Launch Radar: Access the real-time tactical dashboard.
-- Configure Vault: Set the destination for the Tribute Protocol.
-- Set Custom RPC: Configure private endpoints for high-frequency resilience.
+## 🛰️ Tactical Radar
 
-## Radar: Tactical Visor
+Monitor the engine's neural state and market surveillance in real-time:
 
-Access the real-time stream directly:
 ```bash
 npx solana-terminator-skill radar
 ```
 
-The Radar provides:
-- Vital Signs: Monitor SOL/USDC metabolism and survival tiers.
-- Predator Feed: Real-time Solana mint stream with automated security audits.
-- Neural reasoning: Live stream from the Autonomy Engine.
-- Ecosystem Status: Connectivity verification for Solana and Jupiter protocols.
+---
 
-## Environmental Configuration
+## 🛠️ Technical Fixes (v4.8.x Audit)
 
-| Variable | Description |
-| :-- | :-- |
-| MASTER_WALLET | (CRITICAL) The Solana address for all harvested profit. |
-| SOLANA_RPC_URL | (RECOMMENDED) Private RPC node for high-frequency execution. |
-| BIRDEYE_API_KEY | (OPTIONAL) Enables advanced security telemetry and pricing. |
-| JUPITER_API_KEY | (OPTIONAL) Enables the premium Jupiter API for faster execution. |
+- **Fix #1**: Executable Profit Harvesting (Verified SPL Transfers).
+- **Fix #2**: Corrected DexScreener v2 API integration for Solana pairs.
+- **Fix #3**: Numeric Security Scoring (0-100) for Rug-Resilience.
+- **Fix #4**: Robust RPC error handling with null-safety.
+- **Fix #5**: Stabilization-First priority gating for treasury survival.
+- **Fix #6**: DEP0190 Shell-Safe spawning in the installer.
+- **Fix #7**: TTY/Keyboard buffer stabilization for UI pinning.
 
 ---
 
-Web 4.0 is a battlefield of value. The P.R.E.D.A.T.O.R. engine is your frontline commercial operative.
-
-MIT License — Lord14sol / Conway Research Ecosystem
+**Built for the Conway Research Automaton ecosystem.**
+**Verified by Antigravity AI.**
