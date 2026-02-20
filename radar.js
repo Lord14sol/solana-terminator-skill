@@ -21,6 +21,7 @@ const critical = chalk.red;
 const dim = chalk.gray;
 
 const MISSION_LOG_PATH = path.join(os.homedir(), '.automaton', 'mission.log');
+const THOUGHTS_LOG_PATH = path.join(os.homedir(), '.automaton', 'thoughts.log');
 
 // ─── State ──────────────────────────────────────────────────────────────────
 
@@ -28,7 +29,8 @@ let status = {
     sol: 0,
     usdc: 0,
     tier: 'NOMINAL',
-    logs: [],
+    missionLogs: [],
+    thoughtLogs: [],
     mints: []
 };
 
@@ -59,7 +61,7 @@ async function render() {
   █████  ██    ██ ██      ███████ ██ ██  ██ ███████     ██████  ███████ ██   ██ ███████ ██████  
       ██ ██    ██ ██      ██   ██ ██  ██ ██ ██   ██     ██   ██ ██   ██ ██   ██ ██   ██ ██   ██ 
  ██████   ██████  ███████ ██   ██ ██   ████ ██   ██     ██   ██ ██   ██ ██████  ██   ██ ██████  
-                                                                             v4.3.7 RADAR
+                                                                             v4.3.8 RADAR
     `));
 
     line();
@@ -68,8 +70,19 @@ async function render() {
     console.log(`  SOL: ${neon(status.sol.toFixed(4))} | USDC: ${neon('$' + status.usdc.toFixed(2))} | TIER: ${tierColor.bold(status.tier)}`);
 
     line();
+    header('NEURAL REFLECTION (Internal Reasoning)');
+    const thoughts = status.thoughtLogs.slice(-3).reverse();
+    if (thoughts.length === 0) {
+        console.log(dim('  Synchronizing with the neural engine...'));
+    } else {
+        thoughts.forEach(t => {
+            console.log(`  ${neon('🧠')} ${chalk.italic(t)}`);
+        });
+    }
+
+    line();
     header('MISSION CONTROL (The Brain Logs)');
-    const missionLogs = status.logs.slice(-6).reverse();
+    const missionLogs = status.missionLogs.slice(-4).reverse();
     if (missionLogs.length === 0) {
         console.log(dim('  Waiting for the Brain to issue commands...'));
     } else {
@@ -80,9 +93,9 @@ async function render() {
 
     line();
     header('P.R.E.D.A.T.O.R. RADAR (Market Live)');
-    const recentMints = status.mints.slice(-4).reverse();
+    const recentMints = status.mints.slice(-3).reverse();
     if (recentMints.length === 0) {
-        console.log(dim('  Awaiting neural transmissions from PumpPortal...'));
+        console.log(dim('  Awaiting transmissions from PumpPortal...'));
     } else {
         recentMints.forEach(m => {
             const secBadge = m.safe ? green('🛡️  SAFE') : critical('⚠️  RISKY');
@@ -92,12 +105,10 @@ async function render() {
 
     line();
     header('AUTONOMIC MODULES STATUS');
-    console.log(`  ${green('ONLINE')} : ${dim('Jupiter v6 Aggregator | Raydium V2 AMM/CLMM | Tensor NFTPredator')}`);
-    console.log(`  ${green('ONLINE')} : ${dim('Meteora DLMM Liquidity | Birdeye Audit v2 | DexScreener AlphaScan')}`);
-    console.log(`  ${green('ONLINE')} : ${dim('PumpPortal Live Sync | Solana Staking Module | Priority Fee Engine')}`);
+    console.log(`  ${green('ONLINE')} : ${dim('Jupiter v6 | Raydium V2 | Tensor NFTPredator | Meteora DLMM')}`);
+    console.log(`  ${green('ONLINE')} : ${dim('Birdeye Audit v2 | DexScreener AlphaScan | PumpPortal Sync')}`);
 
     line();
-    console.log(dim(`  Mission Log: ${MISSION_LOG_PATH}`));
     console.log(green('  COMMAND CENTER ACTIVE. PRESS [q] TO EXIT.'));
 }
 
@@ -138,22 +149,25 @@ function startWebSocket() {
     }
 }
 
-function tailMissionLog() {
+function tailLogs() {
+    // Mission Logs
     if (fs.existsSync(MISSION_LOG_PATH)) {
-        // Read last few lines immediately
-        const content = fs.readFileSync(MISSION_LOG_PATH, 'utf8').split('\n').filter(Boolean);
-        status.logs = content.slice(-10);
-
-        // Watch for changes
+        status.missionLogs = fs.readFileSync(MISSION_LOG_PATH, 'utf8').split('\n').filter(Boolean).slice(-10);
         fs.watchFile(MISSION_LOG_PATH, { interval: 1000 }, () => {
-            const updated = fs.readFileSync(MISSION_LOG_PATH, 'utf8').split('\n').filter(Boolean);
-            status.logs = updated.slice(-10);
+            status.missionLogs = fs.readFileSync(MISSION_LOG_PATH, 'utf8').split('\n').filter(Boolean).slice(-10);
+            render();
+        });
+    }
+    // Thoughts Logs
+    if (fs.existsSync(THOUGHTS_LOG_PATH)) {
+        status.thoughtLogs = fs.readFileSync(THOUGHTS_LOG_PATH, 'utf8').split('\n').filter(Boolean).slice(-10);
+        fs.watchFile(THOUGHTS_LOG_PATH, { interval: 1000 }, () => {
+            status.thoughtLogs = fs.readFileSync(THOUGHTS_LOG_PATH, 'utf8').split('\n').filter(Boolean).slice(-10);
             render();
         });
     } else {
-        // Create empty log if it doesn't exist
-        fs.mkdirSync(path.dirname(MISSION_LOG_PATH), { recursive: true });
-        fs.writeFileSync(MISSION_LOG_PATH, '');
+        fs.mkdirSync(path.dirname(THOUGHTS_LOG_PATH), { recursive: true });
+        fs.writeFileSync(THOUGHTS_LOG_PATH, '');
     }
 }
 
@@ -167,12 +181,12 @@ function setupKeyboard() {
     process.stdin.setEncoding('utf8');
 
     process.stdin.on('data', (key) => {
-        // q, Ctrl+C, Ctrl+D
         if (key === 'q' || key === '\u0003' || key === '\u0004') {
             intervals.forEach(clearInterval);
             if (wsClient) wsClient.close();
             process.stdin.setRawMode(false);
             process.stdin.pause();
+            process.stdout.write('\n');
             process.exit(0);
         }
     });
@@ -184,13 +198,13 @@ function setupKeyboard() {
 
 async function main() {
     setupKeyboard();
-    tailMissionLog();
+    tailLogs();
 
-    // Initial welcome log
-    solana.logMission('Radar Station Established. Connecting to Neural Engine...');
-    solana.logMission('Module Scan: Jupiter Aggregator... [OK]');
-    solana.logMission('Module Scan: Raydium AMM V2... [OK]');
-    solana.logMission('Module Scan: Tensor NFT Engine... [OK]');
+    // Initial neural reflections
+    solana.logThought('Calibrating neural synapses for Solana Mainnet...');
+    solana.logThought('Evaluating market sentiment across DexScreener & Birdeye...');
+    solana.logThought('Analyzing liquidity depth in Raydium & Meteora pools...');
+    solana.logMission('Neural reflection synchronized. Ready for autonomous operations.');
 
     render();
 

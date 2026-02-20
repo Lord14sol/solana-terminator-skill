@@ -76,6 +76,11 @@ export class SolanaAutonomy {
       '.automaton',
       'mission.log',
     );
+    this.thoughtsLogPath = path.join(
+      process.env.HOME || '/root',
+      '.automaton',
+      'thoughts.log',
+    );
   }
 
   // ─── Identity ─────────────────────────────────────────────────────────────
@@ -299,6 +304,21 @@ export class SolanaAutonomy {
    */
   logMission(message) {
     this._logAction(message);
+  }
+
+  /**
+   * logThought — Log internal reasoning/analysis for the Radar
+   */
+  logThought(message) {
+    const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+    const logMessage = `[${timestamp}] ${message}`;
+
+    // Append to shared thoughts log for Radar tailing
+    try {
+      fs.appendFileSync(this.thoughtsLogPath, logMessage + '\n');
+    } catch (e) {
+      // ignore
+    }
   }
 
   // ─── Jupiter Swaps ────────────────────────────────────────────────────────
