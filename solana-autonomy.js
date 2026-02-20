@@ -123,8 +123,13 @@ export class SolanaAutonomy {
   /** SOL balance in whole SOL. */
   async getSolBalance() {
     if (!this.identity) return 0;
-    const lamports = await this.connection.getBalance(this.identity.publicKey);
-    return lamports / LAMPORTS_PER_SOL;
+    try {
+      const lamports = await this.connection.getBalance(this.identity.publicKey);
+      return lamports / LAMPORTS_PER_SOL;
+    } catch (err) {
+      this.logThought(`RPC Error (SOL): ${err.message}`);
+      return 0;
+    }
   }
 
   /**
@@ -137,7 +142,10 @@ export class SolanaAutonomy {
       const ata = await getAssociatedTokenAddress(USDC_MINT, this.identity.publicKey);
       const account = await getAccount(this.connection, ata);
       return Number(account.amount) / 1_000_000; // USDC has 6 decimals
-    } catch {
+    } catch (err) {
+      if (err.message.includes('429')) {
+        this.logThought('RPC Rate Limit reached (USDC).');
+      }
       return 0;
     }
   }

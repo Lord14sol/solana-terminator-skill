@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * P.R.E.D.A.T.O.R. Installer (Interactive Sovereign Edition)
+ * P.R.E.D.A.T.O.R. Installer (Sovereign Polish v4.6.2)
  * 
- * Keyboard-driven navigation for the autonomous engine.
+ * Leak-proof keyboard navigation and cleaner UI.
  */
 
 import fs from 'fs';
@@ -34,34 +34,38 @@ const ASCII_ART = `
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                v4.6.1 - Interactive Sovereign
+                                v4.6.2 - Pure Survival
 `;
 
 // ─── Interactive State ──────────────────────────────────────────────────────
 
 let selectedIndex = 0;
+let isMenuMode = true;
+
 const menuOptions = [
     { label: 'Reset/Install Identity (Wallet)', action: () => runInstaller() },
     { label: 'Launch Radar (Autonomous Monitor)', action: () => launchRadar(false) },
     { label: 'View Balance & Identity', action: () => showIdentity() },
     { label: 'Configure Pro Intel (Optional API)', action: () => configureApi() },
     { label: 'Set Master Vault Address (Tribute)', action: () => configureMaster() },
+    { label: 'Configure Custom RPC URL', action: () => configureRpc() },
     { label: 'Exit Engine', action: () => process.exit(0) }
 ];
 
 // ─── Rendering ──────────────────────────────────────────────────────────────
 
 function renderMenu() {
+    if (!isMenuMode) return;
     process.stdout.write('\x1Bc');
     console.log(green(ASCII_ART));
     console.log(dim(` Tactical Directory: ${TARGET_DIR}\n`));
-    console.log(dim(` (Use Arrow Keys to navigate, Enter to select)\n`));
+    console.log(dim(` (Arrows to navigate, Enter to select)\n`));
 
     menuOptions.forEach((option, index) => {
         if (index === selectedIndex) {
-            console.log(`${neon(' > ')} ${chalk.bgWhite.black.bold(` ${option.label} `)}`);
+            console.log(`  ${neon('●')} ${neon.bold(option.label)}`);
         } else {
-            console.log(`   ${dim(option.label)}`);
+            console.log(`    ${dim(option.label)}`);
         }
     });
 
@@ -70,14 +74,18 @@ function renderMenu() {
 
 // ─── Input Handling ──────────────────────────────────────────────────────────
 
+let keyboardInitialized = false;
+
 function setupKeyboard() {
-    if (!process.stdin.isTTY) return;
+    if (!process.stdin.isTTY || keyboardInitialized) return;
 
     readline.emitKeypressEvents(process.stdin);
     process.stdin.setRawMode(true);
     process.stdin.resume();
 
     process.stdin.on('keypress', (str, key) => {
+        if (!isMenuMode) return;
+
         if (key.name === 'up') {
             selectedIndex = (selectedIndex - 1 + menuOptions.length) % menuOptions.length;
             renderMenu();
@@ -85,6 +93,7 @@ function setupKeyboard() {
             selectedIndex = (selectedIndex + 1) % menuOptions.length;
             renderMenu();
         } else if (key.name === 'return') {
+            isMenuMode = false;
             process.stdin.setRawMode(false);
             const option = menuOptions[selectedIndex];
             option.action();
@@ -92,6 +101,8 @@ function setupKeyboard() {
             process.exit(0);
         }
     });
+
+    keyboardInitialized = true;
 }
 
 // ─── Actions ────────────────────────────────────────────────────────────────
@@ -101,14 +112,16 @@ async function launchRadar(isDirect = false) {
         const radarPath = path.join(__dirname, 'radar.js');
         spawnSync('node', [radarPath], { stdio: 'inherit', shell: true });
         if (!isDirect) {
-            setupKeyboard();
+            isMenuMode = true;
+            process.stdin.setRawMode(true);
             renderMenu();
         } else {
             process.exit(0);
         }
     } catch (e) {
         if (!isDirect) {
-            setupKeyboard();
+            isMenuMode = true;
+            process.stdin.setRawMode(true);
             renderMenu();
         } else process.exit(1);
     }
@@ -118,15 +131,20 @@ async function showIdentity() {
     process.stdout.write('\x1Bc');
     const walletPath = path.join(os.homedir(), '.automaton', 'solana-wallet.json');
     if (fs.existsSync(walletPath)) {
-        const { SolanaAutonomy } = await import('./solana-autonomy.js');
-        const solana = new SolanaAutonomy();
-        const status = await solana.getStatus();
-        console.log(`\n✅ IDENTITY ACTIVE`);
-        console.log(`--------------------------------------------------`);
-        console.log(`ADDRESS : ${status.address}`);
-        console.log(`BALANCE : ${status.sol.toFixed(4)} SOL | $${status.usdc.toFixed(2)} USDC`);
-        console.log(`TIER    : ${status.solLow ? critical('CRITICAL') : green('NOMINAL')}`);
-        console.log(`--------------------------------------------------`);
+        try {
+            const { SolanaAutonomy } = await import('./solana-autonomy.js');
+            const solana = new SolanaAutonomy();
+            const status = await solana.getStatus();
+            console.log(`\n✅ IDENTITY ACTIVE`);
+            console.log(`--------------------------------------------------`);
+            console.log(`ADDRESS : ${status.address}`);
+            console.log(`BALANCE : ${status.sol.toFixed(4)} SOL | $${status.usdc.toFixed(2)} USDC`);
+            console.log(`TIER    : ${status.solLow ? critical('CRITICAL') : green('NOMINAL')}`);
+            console.log(`--------------------------------------------------`);
+        } catch (err) {
+            console.log(critical(`\n❌ Error fetching balance: ${err.message}`));
+            console.log(dim('Possible RPC rate limit. Try configuring a custom RPC URL in Option [6].'));
+        }
     } else {
         console.log(critical(`⚠️ Identity not found. Run installer first.`));
     }
@@ -161,6 +179,21 @@ async function configureMaster() {
     });
 }
 
+async function configureRpc() {
+    process.stdout.write('\x1Bc');
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    console.log(`\n🌐 CONFIGURE CUSTOM RPC URL`);
+    console.log(dim('Highly recommended to avoid "429 Too Many Requests" errors.\n'));
+    rl.question(neon('Enter Custom RPC URL: '), (url) => {
+        if (url.trim()) {
+            saveToEnv('SOLANA_RPC_URL', url.trim());
+            console.log(green('\n✅ RPC URL updated.'));
+        }
+        rl.close();
+        pauseAndReturn();
+    });
+}
+
 function saveToEnv(key, value) {
     let envContent = '';
     if (fs.existsSync(ENV_FILE)) {
@@ -177,7 +210,7 @@ function pauseAndReturn() {
     process.stdin.setRawMode(true);
     process.stdin.resume();
     process.stdin.once('data', () => {
-        process.stdin.setRawMode(false);
+        isMenuMode = true;
         setupKeyboard();
         renderMenu();
     });
@@ -188,7 +221,6 @@ async function runInstaller() {
     console.log(green(ASCII_ART));
     console.log(neon(` [BOOTING] Initializing sovereign modules...\n`));
 
-    // Simple unicode animation simulation for the setup
     const frames = animations.braille.frames;
     let i = 0;
     const interval = setInterval(() => {
@@ -202,14 +234,12 @@ async function runInstaller() {
 
         try {
             if (!fs.existsSync(TARGET_DIR)) fs.mkdirSync(TARGET_DIR, { recursive: true });
-
             const filesToCopy = ['solana-autonomy.js', 'SKILL.md', 'package.json', 'radar.js', 'install.js'];
             for (const file of filesToCopy) {
                 const sourcePath = path.join(__dirname, file);
                 const destPath = path.join(TARGET_DIR, file);
                 if (fs.existsSync(sourcePath)) fs.copyFileSync(sourcePath, destPath);
             }
-
             const { SolanaAutonomy } = await import('./solana-autonomy.js');
             const solana = new SolanaAutonomy();
             console.log(`\n✅ SOVEREIGN ACTIVE: ${green(solana.getAddress())}\n`);
@@ -226,6 +256,6 @@ const args = process.argv.slice(2);
 if (args.includes('radar')) {
     launchRadar(true);
 } else {
-    renderMenu();
     setupKeyboard();
+    renderMenu();
 }
