@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * P.R.E.D.A.T.O.R. Installer (Pure Survival)
+ * P.R.E.D.A.T.O.R. Installer (Interactive Sovereign Edition)
+ * 
+ * Keyboard-driven navigation for the autonomous engine.
  */
 
 import fs from 'fs';
@@ -11,6 +13,7 @@ import { fileURLToPath } from 'url';
 import { spawnSync } from 'child_process';
 import readline from 'readline';
 import chalk from 'chalk';
+import animations from 'unicode-animations';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,96 +24,120 @@ const alert = chalk.yellow;
 const critical = chalk.red;
 const dim = chalk.gray;
 
+const SKILL_NAME = 'solana-terminator';
+const TARGET_DIR = path.join(os.homedir(), '.automaton', 'skills', SKILL_NAME);
+const ENV_FILE = path.join(os.homedir(), '.automaton', '.env');
+
 const ASCII_ART = `
  ██████  ██████  ███████ ██████   █████  ████████  ██████  ██████  
  ██   ██ ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                v4.5.1 - Pure Survival Edition
+                                v4.6.0 - Interactive Sovereign
 `;
 
-const SKILL_NAME = 'solana-terminator';
-const TARGET_DIR = path.join(os.homedir(), '.automaton', 'skills', SKILL_NAME);
-const ENV_FILE = path.join(os.homedir(), '.automaton', '.env');
+// ─── Interactive State ──────────────────────────────────────────────────────
 
-// ─── Command Routing ────────────────────────────────────────────────────────
+let selectedIndex = 0;
+const menuOptions = [
+    { label: 'Reset/Install Identity (Wallet)', action: () => runInstaller() },
+    { label: 'Launch Radar (Autonomous Monitor)', action: () => launchRadar(false) },
+    { label: 'View Balance & Identity', action: () => showIdentity() },
+    { label: 'Configure Pro Intel (Optional API)', action: () => configureApi() },
+    { label: 'Set Master Vault Address (Tribute)', action: () => configureMaster() },
+    { label: 'Exit Engine', action: () => process.exit(0) }
+];
 
-const args = process.argv.slice(2);
+// ─── Rendering ──────────────────────────────────────────────────────────────
 
-if (args.includes('radar')) {
-    launchRadar(true);
-} else if (args.includes('install')) {
-    runInstaller();
-} else {
-    showMainMenu();
-}
-
-// ─── Main Menu ──────────────────────────────────────────────────────────────
-
-function showMainMenu() {
+function renderMenu() {
     process.stdout.write('\x1Bc');
     console.log(green(ASCII_ART));
     console.log(dim(` Tactical Directory: ${TARGET_DIR}\n`));
+    console.log(dim(` (Use Arrow Keys to navigate, Enter to select)\n`));
 
-    console.log(`${neon('[1]')} Reset/Install Identity (Wallet)`);
-    console.log(`${neon('[2]')} Launch Radar (Autonomous Monitor)`);
-    console.log(`${neon('[3]')} View Balance & Identity`);
-    console.log(`${neon('[4]')} Configure Pro Intel (Optional API)`);
-    console.log(`${neon('[5]')} Set Master Vault Address (Mandatory for Profit Harvesting)`);
-    console.log(`${neon('[q]')} Exit`);
+    menuOptions.forEach((option, index) => {
+        if (index === selectedIndex) {
+            console.log(`${neon(' > ')} ${chalk.bgWhite.black.bold(` ${option.label} `)}`);
+        } else {
+            console.log(`   ${dim(option.label)}`);
+        }
+    });
 
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    rl.question(green('\nSelect option: '), (choice) => {
-        rl.close();
-        switch (choice.toLowerCase()) {
-            case '1': runInstaller().then(() => pauseAndReturn()); break;
-            case '2': launchRadar(false); break;
-            case '3': showIdentity(); break;
-            case '4': configureApi(); break;
-            case '5': configureMaster(); break;
-            case 'q': process.exit(0);
-            default: showMainMenu();
+    console.log('\n' + dim('─'.repeat(50)));
+}
+
+// ─── Input Handling ──────────────────────────────────────────────────────────
+
+function setupKeyboard() {
+    if (!process.stdin.isTTY) return;
+
+    readline.emitKeypressEvents(process.stdin);
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+
+    process.stdin.on('keypress', (str, key) => {
+        if (key.name === 'up') {
+            selectedIndex = (selectedIndex - 1 + menuOptions.length) % menuOptions.length;
+            renderMenu();
+        } else if (key.name === 'down') {
+            selectedIndex = (selectedIndex + 1) % menuOptions.length;
+            renderMenu();
+        } else if (key.name === 'return') {
+            process.stdin.setRawMode(false);
+            const option = menuOptions[selectedIndex];
+            option.action();
+        } else if (key.name === 'q' || (key.ctrl && key.name === 'c')) {
+            process.exit(0);
         }
     });
 }
 
-function launchRadar(isDirect = false) {
+// ─── Actions ────────────────────────────────────────────────────────────────
+
+async function launchRadar(isDirect = false) {
     try {
         const radarPath = path.join(__dirname, 'radar.js');
         spawnSync('node', [radarPath], { stdio: 'inherit', shell: true });
-        if (!isDirect) showMainMenu();
-        else process.exit(0);
+        if (!isDirect) {
+            setupKeyboard();
+            renderMenu();
+        } else {
+            process.exit(0);
+        }
     } catch (e) {
-        if (!isDirect) showMainMenu();
-        else process.exit(1);
+        if (!isDirect) {
+            setupKeyboard();
+            renderMenu();
+        } else process.exit(1);
     }
 }
 
-function showIdentity() {
+async function showIdentity() {
+    process.stdout.write('\x1Bc');
     const walletPath = path.join(os.homedir(), '.automaton', 'solana-wallet.json');
     if (fs.existsSync(walletPath)) {
-        import('./solana-autonomy.js').then(async ({ SolanaAutonomy }) => {
-            const solana = new SolanaAutonomy();
-            const status = await solana.getStatus();
-            console.log(`\n✅ IDENTITY ACTIVE`);
-            console.log(`--------------------------------------------------`);
-            console.log(`ADDRESS : ${status.address}`);
-            console.log(`BALANCE : ${status.sol.toFixed(4)} SOL | $${status.usdc.toFixed(2)} USDC`);
-            console.log(`TIER    : ${status.solLow ? 'CRITICAL' : 'NOMINAL'}`);
-            console.log(`--------------------------------------------------`);
-            pauseAndReturn();
-        });
+        const { SolanaAutonomy } = await import('./solana-autonomy.js');
+        const solana = new SolanaAutonomy();
+        const status = await solana.getStatus();
+        console.log(`\n✅ IDENTITY ACTIVE`);
+        console.log(`--------------------------------------------------`);
+        console.log(`ADDRESS : ${status.address}`);
+        console.log(`BALANCE : ${status.sol.toFixed(4)} SOL | $${status.usdc.toFixed(2)} USDC`);
+        console.log(`TIER    : ${status.solLow ? critical('CRITICAL') : green('NOMINAL')}`);
+        console.log(`--------------------------------------------------`);
     } else {
-        console.log(`⚠️ Identity not found. Run Option [1] first.`);
-        pauseAndReturn();
+        console.log(critical(`⚠️ Identity not found. Run installer first.`));
     }
+    pauseAndReturn();
 }
 
-function configureApi() {
+async function configureApi() {
+    process.stdout.write('\x1Bc');
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    console.log(`\n🔑 CONFIGURE API KEY`);
-    rl.question(neon('Enter Birdeye API Key: '), (key) => {
+    console.log(`\n🔑 CONFIGURE PRO INTEL`);
+    rl.question(neon('Enter Birdeye API Key (or press Enter to skip): '), (key) => {
         if (key.trim()) {
             saveToEnv('BIRDEYE_API_KEY', key.trim());
             console.log(green('\n✅ Key saved.'));
@@ -120,13 +147,14 @@ function configureApi() {
     });
 }
 
-function configureMaster() {
+async function configureMaster() {
+    process.stdout.write('\x1Bc');
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    console.log(`\n💳 CONFIGURE MASTER WALLET`);
+    console.log(`\n💳 CONFIGURE MASTER VAULT`);
     rl.question(neon('Enter Master Wallet Address: '), (address) => {
         if (address.trim()) {
             saveToEnv('MASTER_WALLET', address.trim());
-            console.log(green('\n✅ Master wallet set.'));
+            console.log(green('\n✅ Master vault set. Tribute protocol ACTIVE.'));
         }
         rl.close();
         pauseAndReturn();
@@ -145,36 +173,59 @@ function saveToEnv(key, value) {
 }
 
 function pauseAndReturn() {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    rl.question('\nPress ENTER to continue...', () => {
-        rl.close();
-        showMainMenu();
+    console.log(dim('\nPress any key to return...'));
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.once('data', () => {
+        process.stdin.setRawMode(false);
+        setupKeyboard();
+        renderMenu();
     });
 }
 
 async function runInstaller() {
     process.stdout.write('\x1Bc');
-    console.log(ASCII_ART);
-    console.log(`🤖 Initializing survival primitives...\n`);
+    console.log(green(ASCII_ART));
+    console.log(neon(` [BOOTING] Initializing sovereign modules...\n`));
 
-    try {
-        if (!fs.existsSync(TARGET_DIR)) {
-            fs.mkdirSync(TARGET_DIR, { recursive: true });
+    // Simple unicode animation simulation for the setup
+    const frames = animations.braille.frames;
+    let i = 0;
+    const interval = setInterval(() => {
+        process.stdout.write(`\r ${neon(frames[i % frames.length])} Setting up tactical protocols... `);
+        i++;
+    }, 100);
+
+    setTimeout(async () => {
+        clearInterval(interval);
+        process.stdout.write('\r ✅ Tactical protocols initialized.\n');
+
+        try {
+            if (!fs.existsSync(TARGET_DIR)) fs.mkdirSync(TARGET_DIR, { recursive: true });
+
+            const filesToCopy = ['solana-autonomy.js', 'SKILL.md', 'package.json', 'radar.js', 'install.js'];
+            for (const file of filesToCopy) {
+                const sourcePath = path.join(__dirname, file);
+                const destPath = path.join(TARGET_DIR, file);
+                if (fs.existsSync(sourcePath)) fs.copyFileSync(sourcePath, destPath);
+            }
+
+            const { SolanaAutonomy } = await import('./solana-autonomy.js');
+            const solana = new SolanaAutonomy();
+            console.log(`\n✅ SOVEREIGN ACTIVE: ${green(solana.getAddress())}\n`);
+        } catch (err) {
+            console.error(critical(`\n❌ Setup failed: ${err.message}`));
         }
+        pauseAndReturn();
+    }, 2000);
+}
 
-        const filesToCopy = ['solana-autonomy.js', 'SKILL.md', 'package.json', 'radar.js', 'install.js'];
-        filesToCopy.forEach(file => {
-            const sourcePath = path.join(__dirname, file);
-            const destPath = path.join(TARGET_DIR, file);
-            if (fs.existsSync(sourcePath)) fs.copyFileSync(sourcePath, destPath);
-        });
+// ─── Entry Point ─────────────────────────────────────────────────────────────
 
-        const { SolanaAutonomy } = await import('./solana-autonomy.js');
-        const solana = new SolanaAutonomy();
-
-        console.log(`\n✅ READY. Address: ${green(solana.getAddress())}`);
-
-    } catch (err) {
-        console.error(`❌ Setup failed: ${err.message}`);
-    }
+const args = process.argv.slice(2);
+if (args.includes('radar')) {
+    launchRadar(true);
+} else {
+    renderMenu();
+    setupKeyboard();
 }
