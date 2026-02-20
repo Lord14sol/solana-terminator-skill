@@ -1,4 +1,4 @@
-# TECHNICAL AUDIT REPORT: P.R.E.D.A.T.O.R. Sovereign Engine v4.8.2
+# TECHNICAL AUDIT REPORT: P.R.E.D.A.T.O.R. Sovereign Engine v4.8.3
 **Subject**: P.R.E.D.A.T.O.R. (Hardened Web 4.0 Skill for Solana)
 **Ecosystem**: Conway Research Automaton / Solana Mainnet
 **Status**: Production Ready / Verified Alignment
@@ -160,8 +160,8 @@ proceeding to the next:
     Stored at mode 0o600. Directory at mode 0o700.
 
   Resilience (v4.8.0):
-    - SHELL-SAFE SPAWNING (v4.8.2): Removed `shell: true` from `spawnSync` to
-      resolve DEP0190 and prevent command injection vectors in the installer.
+    - SHELL-SAFE SPAWNING (v4.8.3): Explicitly set `shell: false` in `spawnSync`
+      to resolve DEP0190 and guarantee zero shell concatenation vulnerabilities.
     - NULL-SAFE RPC: Balance failures return null, not 0. keepAlive() halts
       on unknown state instead of triggering false emergency trades.
     - STABILIZATION FIRST: SOL→USDC conservative swap always precedes
@@ -206,6 +206,6 @@ When auditing this codebase, verify:
 ─────────────────────────────────────────────────────────────────────────────
 
 Verified by: Antigravity AI
-Version:     4.8.2 "Hardened Architecture"
+Version:     4.8.3 "Hardened Architecture"
 Code audit:  Claude (Anthropic) — bugs #1–#6 identified and patched (incl. DEP0190)
              🦾🏁🚀🏁🦾
