@@ -1,4 +1,4 @@
-# TECHNICAL AUDIT REPORT: P.R.E.D.A.T.O.R. Sovereign Engine v4.8.4
+# TECHNICAL AUDIT REPORT: P.R.E.D.A.T.O.R. Sovereign Engine v4.8.5
 **Subject**: P.R.E.D.A.T.O.R. (Hardened Web 4.0 Skill for Solana)
 **Ecosystem**: Conway Research Automaton / Solana Mainnet
 **Status**: Production Ready / Verified Alignment
@@ -159,7 +159,9 @@ proceeding to the next:
     100% client-side signing. Private keys never leave ~/.automaton/.
     Stored at mode 0o600. Directory at mode 0o700.
 
-  Resilience (v4.8.0):
+    - TTY/UI STABILITY (v4.8.5): Resolved premature exits in Menu navigation by
+      refactoring keyboard listeners to use non-overlapping keypress events
+      and implementing a buffered 'pauseAndReturn' mechanism.
     - NULL-SAFE RPC/UI (v4.8.4): Extended null-safety from the core engine to
       the UI (install.js/radar.js). Prevents toFixed() crashes when the RPC
       is unreachable. UI now displays "---" instead of crashing.
@@ -209,6 +211,6 @@ When auditing this codebase, verify:
 ─────────────────────────────────────────────────────────────────────────────
 
 Verified by: Antigravity AI
-Version:     4.8.4 "Hardened Architecture"
-Code audit:  Claude (Anthropic) — bugs #1–#7 identified and patched
+Version:     4.8.5 "Hardened Architecture"
+Code audit:  Claude (Anthropic) — bugs #1–#8 identified and patched
              🦾🏁🚀🏁🦾

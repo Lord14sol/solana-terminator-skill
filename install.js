@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
-import { spawnSync } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import readline from 'readline';
 import chalk from 'chalk';
 import animations from 'unicode-animations';
@@ -34,7 +34,7 @@ const ASCII_ART = `
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                v4.8.4 - Hardened Architecture
+                                v4.8.5 - Hardened Architecture
 `;
 
 // ─── Interactive State ──────────────────────────────────────────────────────
@@ -85,6 +85,7 @@ function setupKeyboard() {
 
     process.stdin.on('keypress', (str, key) => {
         if (!isMenuMode) return;
+        if (!key) return;
 
         if (key.name === 'up') {
             selectedIndex = (selectedIndex - 1 + menuOptions.length) % menuOptions.length;
@@ -94,7 +95,7 @@ function setupKeyboard() {
             renderMenu();
         } else if (key.name === 'return') {
             isMenuMode = false;
-            process.stdin.setRawMode(false);
+            // Dont disable raw mode yet, let the action handle it if needed
             const option = menuOptions[selectedIndex];
             option.action();
         } else if (key.name === 'q' || (key.ctrl && key.name === 'c')) {
@@ -108,28 +109,45 @@ function setupKeyboard() {
 // ─── Actions ────────────────────────────────────────────────────────────────
 
 async function launchRadar(isDirect = false) {
-    try {
-        const radarPath = path.join(__dirname, 'radar.js');
-        console.log(dim(` [Security] Spawning Radar (Strict Shell-Safe Mode)...`));
-        const result = spawnSync(process.execPath, [radarPath], { stdio: 'inherit', shell: false });
-        if (result.error) {
-            console.log(critical(`\n❌ Failed to launch Radar: ${result.error.message}`));
-            console.log(dim('Try running manually: node radar.js'));
-        }
+    const radarPath = path.join(__dirname, 'radar.js');
+    if (!fs.existsSync(radarPath)) {
+        console.log(critical(`\n❌ Radar module not found at: ${radarPath}`));
+        if (!isDirect) pauseAndReturn();
+        else process.exit(1);
+        return;
+    }
+
+    process.stdout.write('\x1Bc');
+    console.log(dim(` [Security] Initializing Radar Launch Protocol...`));
+    console.log(dim(` [Security] Spawning Radar (Strict Shell-Safe Mode)...`));
+
+    // Disable parent TTY control completely
+    if (process.stdin.isTTY) {
+        process.stdin.setRawMode(false);
+        process.stdin.pause();
+    }
+
+    const child = spawn(process.execPath, [radarPath], {
+        stdio: 'inherit',
+        shell: false,
+        env: { ...process.env, RADAR_DIRECT: 'true' }
+    });
+
+    child.on('close', (code) => {
         if (!isDirect) {
             isMenuMode = true;
-            process.stdin.setRawMode(true);
+            setupKeyboard(); // Re-ensure keyboard
             renderMenu();
         } else {
-            process.exit(0);
+            process.exit(code || 0);
         }
-    } catch (e) {
-        if (!isDirect) {
-            isMenuMode = true;
-            process.stdin.setRawMode(true);
-            renderMenu();
-        } else process.exit(1);
-    }
+    });
+
+    child.on('error', (err) => {
+        console.log(critical(`\n❌ Execution Error: ${err.message}`));
+        if (!isDirect) pauseAndReturn();
+        else process.exit(1);
+    });
 }
 
 async function showIdentity() {
@@ -213,14 +231,21 @@ function saveToEnv(key, value) {
 }
 
 function pauseAndReturn() {
-    console.log(dim('\nPress any key to return...'));
+    console.log(dim('\nPress any key to return to menu...'));
+    isMenuMode = false;
     process.stdin.setRawMode(true);
     process.stdin.resume();
-    process.stdin.once('data', () => {
+
+    const onKey = () => {
+        process.stdin.removeListener('keypress', onKey);
         isMenuMode = true;
-        setupKeyboard();
         renderMenu();
-    });
+    };
+
+    // Delay a bit so the 'return' key that triggered the action doesn't trigger this
+    setTimeout(() => {
+        process.stdin.once('keypress', onKey);
+    }, 500);
 }
 
 async function runInstaller() {

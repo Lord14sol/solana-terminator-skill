@@ -1,4 +1,4 @@
-# P.R.E.D.A.T.O.R. Skill — Solana Commercial Brain v4.8.3
+# P.R.E.D.A.T.O.R. Skill — Solana Commercial Brain v4.8.5
 
 ## Identity
 - **Skill ID**: `solana-terminator`
