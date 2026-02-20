@@ -152,17 +152,36 @@ export class SolanaAutonomy {
 
   /** Full status snapshot. */
   async getStatus() {
-    const [sol, usdc] = await Promise.all([
+    const [sol, usdc, ecosystem] = await Promise.all([
       this.getSolBalance(),
       this.getUsdcBalance(),
+      this.verifyEcosystem(),
     ]);
     return {
       address: this.getAddress(),
       sol,
       usdc,
+      ecosystem,
       solLow: sol <= SOL_RESERVE,
       usdcLow: usdc < USDC_LOW,
     };
+  }
+
+  /** Check connectivity to critical Web 4.0 protocols */
+  async verifyEcosystem() {
+    try {
+      const [rpcStatus, jupStatus] = await Promise.allSettled([
+        this.connection.getSlot(),
+        axios.get(`${JUPITER_API}/quote`, { params: { inputMint: SOL_MINT, outputMint: USDC_MINT.toBase58(), amount: 1000000 }, timeout: 5000 })
+      ]);
+      return {
+        online: rpcStatus.status === 'fulfilled' && jupStatus.status === 'fulfilled',
+        rpc: rpcStatus.status === 'fulfilled',
+        jupiter: jupStatus.status === 'fulfilled'
+      };
+    } catch (e) {
+      return { online: false, rpc: false, jupiter: false };
+    }
   }
 
   // ─── Survival Engine ──────────────────────────────────────────────────────

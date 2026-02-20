@@ -31,7 +31,8 @@ let status = {
     tier: 'NOMINAL',
     missionLogs: [],
     thoughtLogs: [],
-    mints: []
+    mints: [],
+    ecosystem: { online: false, rpc: false, jupiter: false }
 };
 
 let intervals = [];
@@ -61,7 +62,7 @@ async function render() {
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                                                           v4.6.2 RADAR
+                                                                           v4.6.3 RADAR
     `));
 
     line();
@@ -114,8 +115,11 @@ async function render() {
     header('AUTONOMOUS MODULES');
     const securityStatus = process.env.BIRDEYE_API_KEY ? green('Pro Intelligence') : alert('Standard (Jupiter Fallback)');
     const vaultStatus = process.env.MASTER_WALLET ? green('ACTIVE') : critical('⚠️  OFF (Set address in Menu)');
-    console.log(`  Security: ${securityStatus}`);
-    console.log(`  Vault   : ${vaultStatus}`);
+    const ecoStatus = status.ecosystem.online ? green('ONLINE') : critical('OFFLINE');
+
+    console.log(`  Security : ${securityStatus}`);
+    console.log(`  Vault    : ${vaultStatus}`);
+    console.log(`  Web 4.0  : ${ecoStatus} ${dim(`(RPC: ${status.ecosystem.rpc ? 'OK' : 'ERR'} | JUP: ${status.ecosystem.jupiter ? 'OK' : 'ERR'})`)}`);
 
     line();
     console.log(green('  RADAR ACTIVE. PRESS [q] TO EXIT.'));
@@ -129,6 +133,7 @@ async function runAutonomousCycle() {
         const stats = await solana.getStatus();
         status.sol = stats.sol;
         status.usdc = stats.usdc;
+        status.ecosystem = stats.ecosystem;
         status.tier = stats.solLow ? 'CRITICAL' : (stats.usdcLow ? 'WARNING' : 'NOMINAL');
     } catch (err) {
         // ignore
