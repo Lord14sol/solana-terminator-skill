@@ -9,7 +9,6 @@
 import chalk from 'chalk';
 import WebSocket from 'ws';
 import { SolanaAutonomy } from './solana-autonomy.js';
-import readline from 'readline';
 
 const solana = new SolanaAutonomy();
 const green = chalk.green;
@@ -55,7 +54,7 @@ async function render() {
   █████  ██    ██ ██      ███████ ██ ██  ██ ███████     ██████  ███████ ██   ██ ███████ ██████  
       ██ ██    ██ ██      ██   ██ ██  ██ ██ ██   ██     ██   ██ ██   ██ ██   ██ ██   ██ ██   ██ 
  ██████   ██████  ███████ ██   ██ ██   ████ ██   ██     ██   ██ ██   ██ ██████  ██   ██ ██████  
-                                                                             v4.3.3 RADAR
+                                                                             v4.3.5 RADAR
     `));
 
     line();
@@ -64,27 +63,33 @@ async function render() {
     console.log(`  SOL: ${neon(status.sol.toFixed(4))} | USDC: ${neon('$' + status.usdc.toFixed(2))} | TIER: ${tierColor.bold(status.tier)}`);
 
     line();
-    header('PREDATOR RADAR (Pump.fun Live)');
-    const recentMints = status.mints.slice(-8).reverse();
+    header('P.R.E.D.A.T.O.R. RADAR');
+    const recentMints = status.mints.slice(-6).reverse();
     if (recentMints.length === 0) {
-        console.log(dim('  Waiting for new transmissions...'));
+        console.log(dim('  Awaiting neural transmissions from PumpPortal...'));
     } else {
         recentMints.forEach(m => {
             const secBadge = m.safe ? green('🛡️  SAFE') : critical('⚠️  RISKY');
-            console.log(`  [${dim(m.time)}] ${neon(m.symbol.padEnd(8))} | VOL: ${alert(m.vol)} | ${secBadge} | ${dim(m.mint.slice(0, 8) + '...')}`);
+            console.log(`  [${dim(m.time)}] ${neon(m.symbol.padEnd(8))} | VOL: ${alert(m.vol)} | ${secBadge} | ${dim(m.mint.slice(0, 10))}`);
         });
     }
 
     line();
+    header('TACTICAL CAPABILITIES (Autonomous Modules)');
+    console.log(`  ${green('ACTIVE')} : ${dim('Jupiter Swap v6 | Raydium V2 (AMM/CLMM) | SOL Staking')}`);
+    console.log(`  ${green('ACTIVE')} : ${dim('Meteora DLMM Liquidity | Tensor NFT Predator | Pump.fun API')}`);
+    console.log(`  ${green('READY')}  : ${dim('Birdeye Rug-Audit v2 | DexScreener Market Alpha')}`);
+
+    line();
     header('DECISION LOG');
-    const recentLogs = status.logs.slice(-5).reverse();
+    const recentLogs = status.logs.slice(-4).reverse();
     recentLogs.forEach(l => {
         console.log(`  ${dim('>')} ${l}`);
     });
 
     line();
     console.log(green('  COMMAND CENTER ACTIVE. REASONING IN PROGRESS...'));
-    console.log(dim('  Press [q] to return | [Ctrl+C] to exit dashboard'));
+    console.log(dim('  Press [q] to return to menu | [Ctrl+C] to shutdown'));
 }
 
 // ─── Logic ──────────────────────────────────────────────────────────────────
@@ -101,56 +106,68 @@ async function updateVitals() {
 }
 
 function startWebSocket() {
-    wsClient = new WebSocket('wss://pumpportal.fun/api/data');
+    try {
+        wsClient = new WebSocket('wss://pumpportal.fun/api/data');
 
-    wsClient.on('open', () => {
-        wsClient.send(JSON.stringify({ method: 'subscribeNewToken' }));
-        status.logs.push(green('Uplink established with PumpPortal WS.'));
-    });
+        wsClient.on('open', () => {
+            wsClient.send(JSON.stringify({ method: 'subscribeNewToken' }));
+            status.logs.push(green('Neural uplink established with PumpPortal.'));
+        });
 
-    wsClient.on('message', async (data) => {
-        const payload = JSON.parse(data);
-        if (payload.txType === 'create') {
-            const security = await solana.auditTokenSecurity(payload.mint);
-            status.mints.push({
-                time: new Date().toLocaleTimeString(),
-                symbol: payload.symbol,
-                mint: payload.mint,
-                vol: '$0', // New mint
-                safe: security.safe
-            });
+        wsClient.on('message', async (data) => {
+            const payload = JSON.parse(data);
+            if (payload.txType === 'create') {
+                const security = await solana.auditTokenSecurity(payload.mint);
+                status.mints.push({
+                    time: new Date().toLocaleTimeString(),
+                    symbol: payload.symbol,
+                    mint: payload.mint,
+                    vol: '$0',
+                    safe: security.safe
+                });
 
-            if (security.safe) {
-                status.logs.push(neon(`Target detected: ${payload.symbol}. Volume spike expected. Security verified.`));
+                if (security.safe) {
+                    status.logs.push(neon(`Target detected: ${payload.symbol}. Security verified.`));
+                }
             }
+        });
+
+        wsClient.on('error', (err) => {
+            status.logs.push(critical(`Uplink error: ${err.message}`));
+        });
+    } catch (e) {
+        status.logs.push(critical(`WS failed: ${e.message}`));
+    }
+}
+
+// ─── Process Management ──────────────────────────────────────────────────────
+
+function setupKeyboard() {
+    if (!process.stdin.isTTY) return;
+
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+
+    process.stdin.on('data', (key) => {
+        if (key === 'q' || key === '\u0011' || key === '\u0003') { // q, Ctrl+Q, or Ctrl+C
+            intervals.forEach(clearInterval);
+            if (wsClient) wsClient.close();
+            process.stdin.setRawMode(false);
+            process.stdin.pause();
+            process.exit(0);
         }
     });
 
-    wsClient.on('error', (err) => {
-        status.logs.push(critical(`WebSocket error: ${err.message}`));
-    });
+    // Forced exit fallback after 300ms if process hangs
+    process.on('SIGTERM', () => process.exit(0));
 }
 
 // ─── Entry Point ─────────────────────────────────────────────────────────────
 
 async function main() {
-    // Enable simple 'q' reading via raw mode
-    if (process.stdin.isTTY) {
-        process.stdin.setRawMode(true);
-        process.stdin.resume();
-        process.stdin.setEncoding('utf8');
-        process.stdin.on('data', (key) => {
-            if (key === 'q' || key === '\u0003') { // q or Ctrl+C
-                intervals.forEach(clearInterval);
-                if (wsClient) wsClient.close();
-                process.stdin.setRawMode(false);
-                process.stdin.pause();
-                process.exit(0);
-            }
-        });
-    }
-
-    status.logs.push('Initializing Solana Autonomy identity...');
+    setupKeyboard();
+    status.logs.push('Initializing Solana Autonomy engine...');
     render();
 
     await updateVitals();

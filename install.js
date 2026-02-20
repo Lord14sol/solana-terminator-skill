@@ -24,13 +24,15 @@ const ASCII_ART = `
     ██    ██████   ████████ ████ ████ ██ ████  ██ ███████    ██    ██    ██ ██████  
     ██    ██       ██  ██   ██ ██  ██ ██ ██ ██ ██ ██   ██    ██    ██    ██ ██  ██  
     ██    ████████ ██   ██  ██     ██ ██ ██  ████ ██   ██    ██     ██████  ██   ██ 
-                                v4.3.4 - Autonomous Engine
+                                v4.3.5 - Autonomous Engine
 `;
 
 const SKILL_NAME = 'solana-terminator';
 const TARGET_DIR = path.join(os.homedir(), '.automaton', 'skills', SKILL_NAME);
 
 // ─── Command Routing ────────────────────────────────────────────────────────
+
+const args = process.argv.slice(2);
 
 if (args.includes('radar')) {
     launchRadar(true);
@@ -45,10 +47,14 @@ if (args.includes('radar')) {
 function launchRadar(isDirect = false) {
     try {
         const radarPath = path.join(__dirname, 'radar.js');
-        // subprocess with 'inherit' is the most robust way to handle interactive CLI keys
-        spawnSync('node', [radarPath], { stdio: 'inherit' });
 
-        // Return to menu ONLY if not direct command line 'radar' call
+        // Spawn independent process with inherited control
+        spawnSync('node', [radarPath], {
+            stdio: 'inherit',
+            shell: true
+        });
+
+        // After child process exits, we return here
         if (!isDirect) {
             showMainMenu();
         } else {
@@ -139,7 +145,6 @@ async function runInstaller() {
     console.log(`🤖 Solana Terminator Skill — Initializing...\n`);
 
     try {
-        // 1. Create target directory
         if (!fs.existsSync(TARGET_DIR)) {
             console.log(`[1/3] Creating directory: ${TARGET_DIR}`);
             fs.mkdirSync(TARGET_DIR, { recursive: true });
@@ -147,7 +152,6 @@ async function runInstaller() {
             console.log(`[1/3] Directory already exists: ${TARGET_DIR}`);
         }
 
-        // 2. Copy files
         console.log(`[2/3] Copying skill files...`);
         const filesToCopy = ['solana-autonomy.js', 'SKILL.md', 'package.json', 'radar.js'];
 
@@ -162,12 +166,10 @@ async function runInstaller() {
             }
         });
 
-        // 3. Install dependencies
         console.log(`[3/3] Installing dependencies in ${TARGET_DIR}...`);
         process.chdir(TARGET_DIR);
         execSync('npm install --production --omit=dev', { stdio: 'inherit' });
 
-        // 4. Show/Generate Wallet Address
         console.log(`\n🔍 Initializing Agent Identity...`);
         try {
             const checkScript = `
