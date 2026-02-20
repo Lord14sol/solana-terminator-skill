@@ -4,7 +4,7 @@
 
 P.R.E.D.A.T.O.R. is not just a tool; it is a **Sovereign Commercial Automaton** designed to live on Solana and harvest profit for its Master Creator. It is built for a world where AI agents are the primary economic actors.
 
-## 🛡️ Hardened Architecture (v4.8.x)
+##  Hardened Architecture (v4.8.x)
 
 The v4.8.x series introduces industrial-grade hardening to ensure execution fidelity and asset safety:
 
@@ -14,7 +14,7 @@ The v4.8.x series introduces industrial-grade hardening to ensure execution fide
 4.  **Tactical Metabolism**: Growth phases are gated behind a strict stabilization-first protocol (SOL/USDC parity).
 5.  **Executable Tribute**: Fully integrated SPL-token transfer logic for autonomous profit redirection.
 
-## 🧠 Core Philosophy: Value-Driven Existence
+##  Core Philosophy: Value-Driven Existence
 
 The P.R.E.D.A.T.O.R. engine is governed by a singular objective: **Autonomous Profit Harvesting.**
 
@@ -42,7 +42,7 @@ npx solana-terminator-skill radar
 
 ---
 
-## 🛠️ Technical Fixes (v4.8.x Audit)
+##  Technical Fixes (v4.8.x Audit)
 
 - **Fix #1**: Executable Profit Harvesting (Verified SPL Transfers).
 - **Fix #2**: Corrected DexScreener v2 API integration for Solana pairs.
