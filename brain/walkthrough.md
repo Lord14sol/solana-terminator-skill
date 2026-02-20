@@ -1,31 +1,30 @@
-# P.R.E.D.A.T.O.R. v4.7.1 — Final Audit Walkthrough
+# P.R.E.D.A.T.O.R. v4.8.0 — Hardened Architecture Walkthrough
 
 ## 2000% Certainty Verification
 
 The Sovereign Commercial Brain has been audited for absolute compatibility with the **Conway Research Automaton** ecosystem.
 
 ### Verified Points
-- [x] **Path Alignment**: Installs to `~/.automaton/skills/solana-terminator`.
-- [x] **Config Integration**: Reads/Writes to `~/.automaton/.env`.
-- [x] **Identity Sharing**: Uses `~/.automaton/solana-wallet.json` for unified state.
-- [x] **Metabolism Logic**: `keepAlive()` protocol verified for auto-stabilization.
-- [x] **Ecosystem Check**: Radar correctly displays Web 4.0 Online/Offline status.
-- [x] **UI Stability**: No memory leaks in keyboard handling. Clean "dot" cursor implemented.
+- [x] **Hardened RPC**: `getSolBalance` / `getUsdcBalance` return `null` on error, preventing false 0 balance triggers.
+- [x] **Stabilization First**: Treasury stabilization is prioritized before growth swaps.
+- [x] **Executable Tribute**: `harvestProfit` now actually sends the USDC tokens.
+- [x] **DexScreener API**: Corrected `/search` endpoints for Solana.
+- [x] **Numeric Scoring**: Security audits now provide a real 0-100 score.
 
 ## The Release Tweet (No Emojis)
 ```text
-The P.R.E.D.A.T.O.R. Sovereign Commercial Brain v4.7.1 is now live.
+The P.R.E.D.A.T.O.R. Sovereign Commercial Brain v4.8.0 is now live.
 
-This update completes the core integration with the Conway Automaton ecosystem. 
+This hardened release introduces a strict priority gate system for industrial-grade survival.
 
-Key functionalities include:
-1. Autonomous survival metabolism via solana-autonomy
-2. Real-time tactical radar with Web 4.0 connectivity verification
-3. Interactive mission control with keyboard-driven navigation
-4. Automated profit harvesting via the Tribute Protocol
-5. Support for custom RPC endpoints to bypass rate limits
+Key functionalities:
+1. Null-safe RPC handling for balance verification accuracy.
+2. Executable Tribute Protocol for automated profit harvesting.
+3. Corrected DexScreener Alpha pipeline with numeric security scoring.
+4. Stabilization-first metabolism to protect treasury health.
+5. Full integration with the Conway Automaton ecosystem.
 
-Access via npx solana-terminator-skill@latest
+Access via: npx solana-terminator-skill@latest
 ```
 
 ## Monetization Roadmap
