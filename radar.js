@@ -3,7 +3,7 @@
 /**
  * P.R.E.D.A.T.O.R. Tactical Radar
  * 
- * Matrix/Cyberpunk style terminal for real-time Solana autonomous monitoring.
+ * Matrix/Cyberpunk terminal for real-time Solana autonomous monitoring.
  */
 
 import chalk from 'chalk';
@@ -61,7 +61,7 @@ async function render() {
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                                                           v4.4.0 RADAR
+                                                                           v4.5.0 RADAR
     `));
 
     line();
@@ -81,10 +81,10 @@ async function render() {
     }
 
     line();
-    header('MISSION CONTROL (The Brain Logs)');
+    header('MISSION CONTROL (Action Logs)');
     const missionLogs = status.missionLogs.slice(-3).reverse();
     if (missionLogs.length === 0) {
-        console.log(dim('  Waiting for the Brain...'));
+        console.log(dim('  Awaiting autonomous actions...'));
     } else {
         missionLogs.forEach(l => {
             console.log(`  ${green('⦿')} ${l}`);
@@ -95,7 +95,7 @@ async function render() {
     header('P.R.E.D.A.T.O.R. RADAR (Market Live)');
     const recentMints = status.mints.slice(-3).reverse();
     if (recentMints.length === 0) {
-        console.log(dim('  Awaiting transmissions from PumpPortal...'));
+        console.log(dim('  Scanning PumpPortal transmissions...'));
     } else {
         recentMints.forEach(m => {
             let secBadge;
@@ -107,19 +107,18 @@ async function render() {
                 secBadge = critical('⚠️  RISKY');
             }
             console.log(`  [${dim(m.time)}] ${neon(m.symbol.padEnd(8))} | ${secBadge} | ${dim(m.mint.slice(0, 16))}`);
-            console.log(`    ${dim('└─ RugCheck:')} ${neon(solana.getRugCheckUrl(m.mint))}`);
         });
     }
 
     line();
-    header('AUTONOMIC MODULES STATUS');
+    header('AUTONOMOUS MODULES');
     const birdEyeStatus = process.env.BIRDEYE_API_KEY ? green('ACTIVE') : alert('FREE_MODE');
     const tributeStatus = process.env.MASTER_WALLET ? green('ALIGNED') : alert('UNSET');
-    console.log(`  Security : Birdeye (${birdEyeStatus}) | Jupiter Fallback (${green('ON')}) | RugCheck (UI)`);
-    console.log(`  Protocol : ${green('TRIBUTE v1.0')} | WEB 4.0: ${green('SOVEREIGN')}`);
+    console.log(`  Security: Birdeye (${birdEyeStatus}) | Jupiter Fallback (${green('ON')})`);
+    console.log(`  Protocol: ${green('TRIBUTE')} | Tribute Target: ${tributeStatus}`);
 
     line();
-    console.log(green('  COMMAND CENTER ACTIVE. PRESS [q] TO EXIT.'));
+    console.log(green('  RADAR ACTIVE. PRESS [q] TO EXIT.'));
 }
 
 // ─── Logic ──────────────────────────────────────────────────────────────────
@@ -212,8 +211,8 @@ async function main() {
     setupKeyboard();
     tailLogs();
 
-    solana.logThought('Web 4.0 Protocol engaged. Sovereign metabolism initialized...');
-    solana.logThought('Uplink established. Engaging P.R.E.D.A.T.O.R. Surveillance loop...');
+    solana.logThought('Survival engine engaged. Monitoring metabolism...');
+    solana.logThought('Uplink established. Engaging P.R.E.D.A.T.O.R. surveillance...');
 
     render();
 

@@ -1,7 +1,7 @@
 {
   "name": "solana-terminator-skill",
-  "version": "4.4.0",
-  "description": "Full Solana toolkit for AI agents. npx solana-terminator-skill.",
+  "version": "4.5.0",
+  "description": "Autonomous survival tool for Solana AI agents.",
   "main": "solana-autonomy.js",
   "type": "module",
   "bin": {
@@ -33,12 +33,9 @@
     "solana",
     "ai",
     "agent",
-    "terminator",
+    "survival",
     "autonomous",
-    "trading",
-    "dex",
-    "radar",
-    "web4"
+    "radar"
   ],
   "author": "Lord14sol",
   "license": "MIT",

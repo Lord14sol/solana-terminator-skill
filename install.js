@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * P.R.E.D.A.T.O.R. Installer (Web 4.0 Sovereign Edition)
- * 
- * Sets up the autonomous identity and mission control.
+ * P.R.E.D.A.T.O.R. Installer (Pure Survival)
  */
 
 import fs from 'fs';
@@ -29,7 +27,7 @@ const ASCII_ART = `
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                v4.4.0 - Sovereign Web 4.0
+                                v4.5.0 - Pure Survival Edition
 `;
 
 const SKILL_NAME = 'solana-terminator';
@@ -55,17 +53,15 @@ function showMainMenu() {
     console.log(green(ASCII_ART));
     console.log(dim(` Tactical Directory: ${TARGET_DIR}\n`));
 
-    console.log(`${neon('[1]')} Reset/Install Sovereign Identity (Wallet)`);
-    console.log(`${neon('[2]')} Launch P.R.E.D.A.T.O.R. Mission Control`);
-    console.log(`${neon('[3]')} View Agent Identity & Bio-sign Monitor`);
-    console.log(`${neon('[4]')} Configure Birdeye API Key (Pro Security)`);
-    console.log(`${neon('[5]')} Configure Master Wallet (Tribute Protocol)`);
-    console.log(`${neon('[6]')} Manual RugCheck verification`);
-    console.log(`${neon('[7]')} View Web 4.0 Documentation`);
-    console.log(`${neon('[q]')} Hibernate Terminal`);
+    console.log(`${neon('[1]')} Reset/Install Identity (Wallet)`);
+    console.log(`${neon('[2]')} Launch Radar (Autonomous Monitor)`);
+    console.log(`${neon('[3]')} View Balance & Identity`);
+    console.log(`${neon('[4]')} Configure Birdeye API Key`);
+    console.log(`${neon('[5]')} Configure Master Wallet (Tribute)`);
+    console.log(`${neon('[q]')} Exit`);
 
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    rl.question(green('\nSelect protocol: '), (choice) => {
+    rl.question(green('\nSelect option: '), (choice) => {
         rl.close();
         switch (choice.toLowerCase()) {
             case '1': runInstaller().then(() => pauseAndReturn()); break;
@@ -73,8 +69,6 @@ function showMainMenu() {
             case '3': showIdentity(); break;
             case '4': configureApi(); break;
             case '5': configureMaster(); break;
-            case '6': runManualRugCheck(); break;
-            case '7': viewDocs(); break;
             case 'q': process.exit(0);
             default: showMainMenu();
         }
@@ -93,37 +87,13 @@ function launchRadar(isDirect = false) {
     }
 }
 
-function runManualRugCheck() {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    console.log(`\n🕵️  MANUAL RUGCHECK.XYZ VERIFICATION`);
-    rl.question(neon('Enter Token Mint Address: '), (mint) => {
-        if (mint.trim()) {
-            console.log(`\n🔗 Verification Link: ${neon(`https://rugcheck.xyz/tokens/${mint.trim()}`)}`);
-            console.log(dim(`(Open this link in your browser to see the full audit)`));
-        }
-        rl.close();
-        pauseAndReturn();
-    });
-}
-
-function viewDocs() {
-    const skillPath = path.join(TARGET_DIR, 'SKILL.md');
-    if (fs.existsSync(skillPath)) {
-        process.stdout.write('\x1Bc');
-        console.log(fs.readFileSync(skillPath, 'utf8'));
-    } else {
-        console.log(`⚠️ Documentation not found. Please install the skill first.`);
-    }
-    pauseAndReturn();
-}
-
 function showIdentity() {
     const walletPath = path.join(os.homedir(), '.automaton', 'solana-wallet.json');
     if (fs.existsSync(walletPath)) {
         import('./solana-autonomy.js').then(async ({ SolanaAutonomy }) => {
             const solana = new SolanaAutonomy();
             const status = await solana.getStatus();
-            console.log(`\n✅ SOVEREIGN IDENTITY ACTIVE`);
+            console.log(`\n✅ IDENTITY ACTIVE`);
             console.log(`--------------------------------------------------`);
             console.log(`ADDRESS : ${status.address}`);
             console.log(`BALANCE : ${status.sol.toFixed(4)} SOL | $${status.usdc.toFixed(2)} USDC`);
@@ -132,18 +102,18 @@ function showIdentity() {
             pauseAndReturn();
         });
     } else {
-        console.log(`⚠️ Identity not found. Please run Option [1] first.`);
+        console.log(`⚠️ Identity not found. Run Option [1] first.`);
         pauseAndReturn();
     }
 }
 
 function configureApi() {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    console.log(`\n🔑 CONFIGURE BIRDEYE API KEY`);
+    console.log(`\n🔑 CONFIGURE API KEY`);
     rl.question(neon('Enter Birdeye API Key: '), (key) => {
         if (key.trim()) {
             saveToEnv('BIRDEYE_API_KEY', key.trim());
-            console.log(green('\n✅ API Key saved.'));
+            console.log(green('\n✅ Key saved.'));
         }
         rl.close();
         pauseAndReturn();
@@ -152,11 +122,11 @@ function configureApi() {
 
 function configureMaster() {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    console.log(`\n💳 CONFIGURE MASTER WALLET (TRIBUTE)`);
+    console.log(`\n💳 CONFIGURE MASTER WALLET`);
     rl.question(neon('Enter Master Wallet Address: '), (address) => {
         if (address.trim()) {
             saveToEnv('MASTER_WALLET', address.trim());
-            console.log(green('\n✅ Tribute target updated.'));
+            console.log(green('\n✅ Master wallet set.'));
         }
         rl.close();
         pauseAndReturn();
@@ -176,18 +146,16 @@ function saveToEnv(key, value) {
 
 function pauseAndReturn() {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    rl.question('\nPress ENTER to return to menu...', () => {
+    rl.question('\nPress ENTER to continue...', () => {
         rl.close();
         showMainMenu();
     });
 }
 
-// ─── Installer Logic ────────────────────────────────────────────────────────
-
 async function runInstaller() {
     process.stdout.write('\x1Bc');
     console.log(ASCII_ART);
-    console.log(`🤖 P.R.E.D.A.T.O.R. Engine — Initializing Web 4.0 Primitives...\n`);
+    console.log(`🤖 Initializing survival primitives...\n`);
 
     try {
         if (!fs.existsSync(TARGET_DIR)) {
@@ -204,9 +172,9 @@ async function runInstaller() {
         const { SolanaAutonomy } = await import('./solana-autonomy.js');
         const solana = new SolanaAutonomy();
 
-        console.log(`\n✅ SOVEREIGN AUTOMATON READY. Address: ${green(solana.getAddress())}`);
+        console.log(`\n✅ READY. Address: ${green(solana.getAddress())}`);
 
     } catch (err) {
-        console.error(`❌ Installation failed: ${err.message}`);
+        console.error(`❌ Setup failed: ${err.message}`);
     }
 }
