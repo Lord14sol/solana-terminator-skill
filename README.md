@@ -32,7 +32,7 @@ npx clear-npx-cache
 npx solana-terminator-skill@latest
 ```
 
-## 🛰️ Tactical Radar
+##  Tactical Radar
 
 Monitor the engine's neural state and market surveillance in real-time:
 
