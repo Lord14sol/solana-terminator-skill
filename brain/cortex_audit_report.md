@@ -31,7 +31,7 @@ The engine follows the Conway Research SKILL standard:
                thoughts.log (neural reasoning)
 
 ─────────────────────────────────────────────────────────────────────────────
-3. Autonomous Logic (The Brain) — v4.8.0 Hardened
+3. Autonomous Logic (The Brain) — v4.8.3 Hardened
 ─────────────────────────────────────────────────────────────────────────────
 
 3.1  keepAlive() — Operational Metabolism
