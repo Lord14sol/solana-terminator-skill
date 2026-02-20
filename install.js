@@ -34,7 +34,7 @@ const ASCII_ART = `
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                v4.8.5 - Hardened Architecture
+                                v4.8.6 - Hardened Architecture
 `;
 
 // ─── Interactive State ──────────────────────────────────────────────────────
@@ -173,7 +173,7 @@ async function showIdentity() {
     } else {
         console.log(critical(`⚠️ Identity not found. Run installer first.`));
     }
-    pauseAndReturn();
+    await pauseAndReturn();
 }
 
 async function configureApi() {
@@ -230,22 +230,23 @@ function saveToEnv(key, value) {
     fs.writeFileSync(ENV_FILE, envContent.trim() + '\n');
 }
 
-function pauseAndReturn() {
-    console.log(dim('\nPress any key to return to menu...'));
-    isMenuMode = false;
-    process.stdin.setRawMode(true);
-    process.stdin.resume();
+async function pauseAndReturn() {
+    return new Promise((resolve) => {
+        console.log(dim('\nPress any key to return to menu...'));
+        isMenuMode = false;
 
-    const onKey = () => {
-        process.stdin.removeListener('keypress', onKey);
-        isMenuMode = true;
-        renderMenu();
-    };
+        const onKey = () => {
+            process.stdin.removeListener('keypress', onKey);
+            isMenuMode = true;
+            renderMenu();
+            resolve();
+        };
 
-    // Delay a bit so the 'return' key that triggered the action doesn't trigger this
-    setTimeout(() => {
-        process.stdin.once('keypress', onKey);
-    }, 500);
+        // Increased delay to 800ms and using a clean Promise to ensure it stays pinned
+        setTimeout(() => {
+            process.stdin.once('keypress', onKey);
+        }, 800);
+    });
 }
 
 async function runInstaller() {
