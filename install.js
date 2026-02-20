@@ -3,32 +3,38 @@
 /**
  * Solana Terminator Skill Installer
  * 
- * Automates the setup of the Solana skill for the Conway Automaton.
+ * Sets up the autonomous identity and mission control.
  */
 
-import { execSync, spawnSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import os from 'os';
+import { fileURLToPath } from 'url';
+import { spawnSync } from 'child_process';
 import readline from 'readline';
+import chalk from 'chalk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ─── Constants ──────────────────────────────────────────────────────────────
+const green = chalk.green;
+const neon = chalk.cyan;
+const alert = chalk.yellow;
+const critical = chalk.red;
+const dim = chalk.gray;
 
 const ASCII_ART = `
- ████████ ████████ ████████ ██     ██ ██ ██    ██  █████  ████████  ██████  ██████  
-    ██    ██       ██    ██ ███   ███ ██ ███   ██ ██   ██    ██    ██    ██ ██   ██ 
-    ██    ██████   ████████ ████ ████ ██ ████  ██ ███████    ██    ██    ██ ██████  
-    ██    ██       ██  ██   ██ ██  ██ ██ ██ ██ ██ ██   ██    ██    ██    ██ ██  ██  
-    ██    ████████ ██   ██  ██     ██ ██ ██  ████ ██   ██    ██     ██████  ██   ██ 
-                                v4.3.9 - Autonomous Engine
+ ██████  ██████  ███████ ██████   █████  ████████  ██████  ██████  
+ ██   ██ ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
+ ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
+ ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
+ ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
+                                v4.3.12 - Neural Predator
 `;
 
 const SKILL_NAME = 'solana-terminator';
 const TARGET_DIR = path.join(os.homedir(), '.automaton', 'skills', SKILL_NAME);
+const ENV_FILE = path.join(os.homedir(), '.automaton', '.env');
 
 // ─── Command Routing ────────────────────────────────────────────────────────
 
@@ -42,19 +48,44 @@ if (args.includes('radar')) {
     showMainMenu();
 }
 
-// ─── Logic ─────────────────────────────────────────────────────────────
+// ─── Main Menu ──────────────────────────────────────────────────────────────
+
+function showMainMenu() {
+    process.stdout.write('\x1Bc');
+    console.log(green(ASCII_ART));
+    console.log(dim(` Tactical Directory: ${TARGET_DIR}\n`));
+
+    console.log(`${neon('[1]')} Reset/Install Solana Agent Identity`);
+    console.log(`${neon('[2]')} Launch P.R.E.D.A.T.O.R. Mission Control (Radar)`);
+    console.log(`${neon('[3]')} View Agent Identity (Address & Balances)`);
+    console.log(`${neon('[4]')} Configure Birdeye API Key (Security Audits)`);
+    console.log(`${neon('[5]')} View Tactical Documentation`);
+    console.log(`${neon('[q]')} Exit Terminal`);
+
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    rl.question(green('\nSelect tactical option: '), (choice) => {
+        rl.close();
+        switch (choice.toLowerCase()) {
+            case '1': runInstaller().then(() => pauseAndReturn()); break;
+            case '2': launchRadar(false); break;
+            case '3': showIdentity(); break;
+            case '4': configureApi(); break;
+            case '5': viewDocs(); break;
+            case 'q': process.exit(0);
+            default: showMainMenu();
+        }
+    });
+}
 
 function launchRadar(isDirect = false) {
     try {
         const radarPath = path.join(__dirname, 'radar.js');
 
-        // Spawn independent process with inherited control
         spawnSync('node', [radarPath], {
             stdio: 'inherit',
             shell: true
         });
 
-        // After child process exits, we return here
         if (!isDirect) {
             showMainMenu();
         } else {
@@ -66,37 +97,7 @@ function launchRadar(isDirect = false) {
     }
 }
 
-// ─── Menu System ────────────────────────────────────────────────────────────
-
-function showMainMenu() {
-    process.stdout.write('\x1Bc');
-    console.log(ASCII_ART);
-    console.log(`🤖 Solana Terminator — Main Control Unit\n`);
-    console.log(`[1] 🛠  Install/Initialize Skill`);
-    console.log(`[2] 📡 Launch Tactical Radar (Dashboard)`);
-    console.log(`[3] 🔍 View Agent Identity & Wallet`);
-    console.log(`[4] 📄 Show Documentation (SKILL.md)`);
-    console.log(`[x] Exit\n`);
-
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-
-    rl.question('Select an option: ', (answer) => {
-        rl.close();
-        switch (answer.toLowerCase()) {
-            case '1': runInstaller(); break;
-            case '2': launchRadar(); break;
-            case '3': showIdentity(); break;
-            case '4': showDocs(); break;
-            case 'x': process.exit(0);
-            default: showMainMenu();
-        }
-    });
-}
-
-function showDocs() {
+function viewDocs() {
     const skillPath = path.join(TARGET_DIR, 'SKILL.md');
     if (fs.existsSync(skillPath)) {
         process.stdout.write('\x1Bc');
@@ -129,6 +130,31 @@ function showIdentity() {
     }
 }
 
+function configureApi() {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    console.log(`\n🔑 CONFIGURE BIRDEYE API KEY`);
+    console.log(dim(`This key is required for the P.R.E.D.A.T.O.R. to flag SAFE tokens.`));
+
+    rl.question(neon('Enter Birdeye API Key: '), (key) => {
+        if (key.trim()) {
+            let envContent = '';
+            if (fs.existsSync(ENV_FILE)) {
+                envContent = fs.readFileSync(ENV_FILE, 'utf8');
+                // Remove existing key if any
+                envContent = envContent.split('\n').filter(line => !line.startsWith('BIRDEYE_API_KEY=')).join('\n');
+            }
+            envContent += `\nBIRDEYE_API_KEY=${key.trim()}\n`;
+            fs.mkdirSync(path.dirname(ENV_FILE), { recursive: true });
+            fs.writeFileSync(ENV_FILE, envContent.trim() + '\n');
+            console.log(green('\n✅ API Key saved to ~/.automaton/.env'));
+        } else {
+            console.log(alert('\n⚠️ Key unchanged.'));
+        }
+        rl.close();
+        pauseAndReturn();
+    });
+}
+
 function pauseAndReturn() {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     rl.question('\nPress ENTER to return to menu...', () => {
@@ -142,77 +168,33 @@ function pauseAndReturn() {
 async function runInstaller() {
     process.stdout.write('\x1Bc');
     console.log(ASCII_ART);
-    console.log(`🤖 Solana Terminator Skill — Initializing...\n`);
+    console.log(`🤖 P.R.E.D.A.T.O.R. Engine — Initializing...\n`);
 
     try {
         if (!fs.existsSync(TARGET_DIR)) {
             console.log(`[1/3] Creating directory: ${TARGET_DIR}`);
             fs.mkdirSync(TARGET_DIR, { recursive: true });
-        } else {
-            console.log(`[1/3] Directory already exists: ${TARGET_DIR}`);
         }
 
-        console.log(`[2/3] Copying skill files...`);
-        const filesToCopy = ['solana-autonomy.js', 'SKILL.md', 'package.json', 'radar.js'];
+        console.log(`[2/3] Copying tactical files...`);
+        const filesToCopy = ['solana-autonomy.js', 'SKILL.md', 'package.json', 'radar.js', 'install.js'];
 
         filesToCopy.forEach(file => {
             const sourcePath = path.join(__dirname, file);
             const destPath = path.join(TARGET_DIR, file);
-
             if (fs.existsSync(sourcePath)) {
                 fs.copyFileSync(sourcePath, destPath);
-            } else {
-                console.warn(`      ⚠️ Warning: ${file} not found in source.`);
             }
         });
 
-        console.log(`[3/3] Installing dependencies in ${TARGET_DIR}...`);
-        process.chdir(TARGET_DIR);
-        execSync('npm install --production --omit=dev', { stdio: 'inherit' });
+        console.log(`[3/3] Scanning neural identity...`);
+        const { SolanaAutonomy } = await import('./solana-autonomy.js');
+        const solana = new SolanaAutonomy();
 
-        console.log(`\n🔍 Initializing Agent Identity...`);
-        try {
-            const checkScript = `
-                import { Keypair } from '@solana/web3.js';
-                import fs from 'fs';
-                import path from 'path';
-                import os from 'os';
-                const walletPath = path.join(os.homedir(), '.automaton', 'solana-wallet.json');
-                
-                let keypair;
-                if (fs.existsSync(walletPath)) {
-                    const raw = fs.readFileSync(walletPath, 'utf8');
-                    keypair = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(raw)));
-                } else {
-                    keypair = Keypair.generate();
-                    const dir = path.dirname(walletPath);
-                    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
-                    fs.writeFileSync(walletPath, JSON.stringify(Array.from(keypair.secretKey)), { mode: 0o600 });
-                }
-                console.log(keypair.publicKey.toBase58());
-            `;
-            const tempScriptPath = path.join(TARGET_DIR, 'temp-check.js');
-            fs.writeFileSync(tempScriptPath, checkScript);
+        console.log(`\n✅ P.R.E.D.A.T.O.R. MISSION CONTROL READY.`);
+        console.log(`Address: ${green(solana.getAddress())}`);
 
-            const address = execSync(`node ${tempScriptPath}`, { encoding: 'utf8' }).trim();
-            fs.unlinkSync(tempScriptPath);
-
-            console.log(`\n✅ Installation Complete!`);
-            console.log(`--------------------------------------------------`);
-            console.log(`Skill Location : ${TARGET_DIR}`);
-            console.log(`AGENT ADDRESS  : ${address}  👈 FUND THIS ADDRESS`);
-            console.log(`--------------------------------------------------`);
-            console.log(`\n💡 To start the agent, your human user must fund it with at least 0.05 SOL.`);
-            console.log(`   Config file: ~/.automaton/solana-wallet.json\n`);
-        } catch (e) {
-            console.log(`\n✅ Installation Complete!`);
-            console.log(`Skill Location : ${TARGET_DIR}`);
-            console.log(`(Identity check failed: ${e.message}, your wallet will be generated on first run)`);
-        }
-        pauseAndReturn();
-
-    } catch (error) {
-        console.error(`\n❌ Installation failed: ${error.message}`);
-        process.exit(1);
+    } catch (err) {
+        console.error(`❌ Installation failed: ${err.message}`);
     }
 }

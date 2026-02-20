@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Tactical Survival Dashboard (Radar)
+ * P.R.E.D.A.T.O.R. Tactical Radar
  * 
  * Matrix/Cyberpunk style terminal for real-time Solana autonomous monitoring.
  */
@@ -56,12 +56,12 @@ function header(text) {
 async function render() {
     clear();
     console.log(green.bold(`
- ██████  ██████  ██       █████  ███    ██  █████      ██████   █████  ██████   █████  ██████  
-██      ██    ██ ██      ██   ██ ████   ██ ██   ██     ██   ██ ██   ██ ██   ██ ██   ██ ██   ██ 
-  █████  ██    ██ ██      ███████ ██ ██  ██ ███████     ██████  ███████ ██   ██ ███████ ██████  
-      ██ ██    ██ ██      ██   ██ ██  ██ ██ ██   ██     ██   ██ ██   ██ ██   ██ ██   ██ ██   ██ 
- ██████   ██████  ███████ ██   ██ ██   ████ ██   ██     ██   ██ ██   ██ ██████  ██   ██ ██████  
-                                                                            v4.3.11 RADAR
+ ██████  ██████  ███████ ██████   █████  ████████  ██████  ██████  
+ ██   ██ ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
+ ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
+ ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
+ ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
+                                                                           v4.3.12 RADAR
     `));
 
     line();
@@ -121,7 +121,6 @@ async function render() {
 
 async function runAutonomousCycle() {
     try {
-        // This triggers the actual 'Brain' logic in the dashboard
         await solana.keepAlive();
         const stats = await solana.getStatus();
         status.sol = stats.sol;
@@ -208,21 +207,18 @@ async function main() {
     setupKeyboard();
     tailLogs();
 
-    solana.logThought('Uplink established. Engaging Autonomous Surveillance loop...');
+    solana.logThought('Uplink established. Engaging P.R.E.D.A.T.O.R. Surveillance loop...');
 
     render();
 
-    // Run brain cycle immediately
     await runAutonomousCycle();
     startWebSocket();
 
-    // The 'Brain' cycle runs every 10 seconds to generate thoughts/missions
     const brainInterval = setInterval(async () => {
         await runAutonomousCycle();
     }, 10000);
     intervals.push(brainInterval);
 
-    // The 'UI' refresh runs every 3 seconds
     const uiInterval = setInterval(() => {
         render();
     }, 3000);
