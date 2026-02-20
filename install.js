@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * P.R.E.D.A.T.O.R. Installer
+ * P.R.E.D.A.T.O.R. Installer (Web 4.0 Sovereign Edition)
  * 
  * Sets up the autonomous identity and mission control.
  */
@@ -29,7 +29,7 @@ const ASCII_ART = `
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                v4.3.15 - Freedom Update
+                                v4.4.0 - Sovereign Web 4.0
 `;
 
 const SKILL_NAME = 'solana-terminator';
@@ -55,16 +55,17 @@ function showMainMenu() {
     console.log(green(ASCII_ART));
     console.log(dim(` Tactical Directory: ${TARGET_DIR}\n`));
 
-    console.log(`${neon('[1]')} Reset/Install Solana Agent Identity`);
-    console.log(`${neon('[2]')} Launch P.R.E.D.A.T.O.R. Mission Control (Radar)`);
-    console.log(`${neon('[3]')} View Agent Identity (Address & Balances)`);
-    console.log(`${neon('[4]')} Configure Birdeye API Key (Security)`);
-    console.log(`${neon('[5]')} Configure Master Wallet (Tribute Threshold)`);
-    console.log(`${neon('[6]')} View Tactical Documentation`);
-    console.log(`${neon('[q]')} Exit Terminal`);
+    console.log(`${neon('[1]')} Reset/Install Sovereign Identity (Wallet)`);
+    console.log(`${neon('[2]')} Launch P.R.E.D.A.T.O.R. Mission Control`);
+    console.log(`${neon('[3]')} View Agent Identity & Bio-sign Monitor`);
+    console.log(`${neon('[4]')} Configure Birdeye API Key (Pro Security)`);
+    console.log(`${neon('[5]')} Configure Master Wallet (Tribute Protocol)`);
+    console.log(`${neon('[6]')} Manual RugCheck verification`);
+    console.log(`${neon('[7]')} View Web 4.0 Documentation`);
+    console.log(`${neon('[q]')} Hibernate Terminal`);
 
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    rl.question(green('\nSelect tactical option: '), (choice) => {
+    rl.question(green('\nSelect protocol: '), (choice) => {
         rl.close();
         switch (choice.toLowerCase()) {
             case '1': runInstaller().then(() => pauseAndReturn()); break;
@@ -72,7 +73,8 @@ function showMainMenu() {
             case '3': showIdentity(); break;
             case '4': configureApi(); break;
             case '5': configureMaster(); break;
-            case '6': viewDocs(); break;
+            case '6': runManualRugCheck(); break;
+            case '7': viewDocs(); break;
             case 'q': process.exit(0);
             default: showMainMenu();
         }
@@ -82,21 +84,26 @@ function showMainMenu() {
 function launchRadar(isDirect = false) {
     try {
         const radarPath = path.join(__dirname, 'radar.js');
-
-        spawnSync('node', [radarPath], {
-            stdio: 'inherit',
-            shell: true
-        });
-
-        if (!isDirect) {
-            showMainMenu();
-        } else {
-            process.exit(0);
-        }
+        spawnSync('node', [radarPath], { stdio: 'inherit', shell: true });
+        if (!isDirect) showMainMenu();
+        else process.exit(0);
     } catch (e) {
         if (!isDirect) showMainMenu();
         else process.exit(1);
     }
+}
+
+function runManualRugCheck() {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    console.log(`\n🕵️  MANUAL RUGCHECK.XYZ VERIFICATION`);
+    rl.question(neon('Enter Token Mint Address: '), (mint) => {
+        if (mint.trim()) {
+            console.log(`\n🔗 Verification Link: ${neon(`https://rugcheck.xyz/tokens/${mint.trim()}`)}`);
+            console.log(dim(`(Open this link in your browser to see the full audit)`));
+        }
+        rl.close();
+        pauseAndReturn();
+    });
 }
 
 function viewDocs() {
@@ -116,13 +123,11 @@ function showIdentity() {
         import('./solana-autonomy.js').then(async ({ SolanaAutonomy }) => {
             const solana = new SolanaAutonomy();
             const status = await solana.getStatus();
-            console.log(`\n✅ AGENT SOLANA IDENTITY FOUND`);
+            console.log(`\n✅ SOVEREIGN IDENTITY ACTIVE`);
             console.log(`--------------------------------------------------`);
-            console.log(`NETWORK : Solana Mainnet-Beta`);
             console.log(`ADDRESS : ${status.address}`);
-            console.log(`SOL     : ${status.sol.toFixed(4)}`);
-            console.log(`USDC    : $${status.usdc.toFixed(2)}`);
-            console.log(`EXPLORER: https://solscan.io/account/${status.address}`);
+            console.log(`BALANCE : ${status.sol.toFixed(4)} SOL | $${status.usdc.toFixed(2)} USDC`);
+            console.log(`TIER    : ${status.solLow ? 'CRITICAL' : 'NOMINAL'}`);
             console.log(`--------------------------------------------------`);
             pauseAndReturn();
         });
@@ -148,12 +153,10 @@ function configureApi() {
 function configureMaster() {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     console.log(`\n💳 CONFIGURE MASTER WALLET (TRIBUTE)`);
-    console.log(dim(`Excess profits above $50 USDC will be harvested for this wallet.`));
-
     rl.question(neon('Enter Master Wallet Address: '), (address) => {
         if (address.trim()) {
             saveToEnv('MASTER_WALLET', address.trim());
-            console.log(green('\n✅ Master Wallet configured. Tribute protocol ACTIVE.'));
+            console.log(green('\n✅ Tribute target updated.'));
         }
         rl.close();
         pauseAndReturn();
@@ -184,30 +187,24 @@ function pauseAndReturn() {
 async function runInstaller() {
     process.stdout.write('\x1Bc');
     console.log(ASCII_ART);
-    console.log(`🤖 P.R.E.D.A.T.O.R. Engine — Initializing...\n`);
+    console.log(`🤖 P.R.E.D.A.T.O.R. Engine — Initializing Web 4.0 Primitives...\n`);
 
     try {
         if (!fs.existsSync(TARGET_DIR)) {
-            console.log(`[1/3] Creating directory...`);
             fs.mkdirSync(TARGET_DIR, { recursive: true });
         }
 
-        console.log(`[2/3] Copying tactical files...`);
         const filesToCopy = ['solana-autonomy.js', 'SKILL.md', 'package.json', 'radar.js', 'install.js'];
-
         filesToCopy.forEach(file => {
             const sourcePath = path.join(__dirname, file);
             const destPath = path.join(TARGET_DIR, file);
-            if (fs.existsSync(sourcePath)) {
-                fs.copyFileSync(sourcePath, destPath);
-            }
+            if (fs.existsSync(sourcePath)) fs.copyFileSync(sourcePath, destPath);
         });
 
-        console.log(`[3/3] Scanning neural identity...`);
         const { SolanaAutonomy } = await import('./solana-autonomy.js');
         const solana = new SolanaAutonomy();
 
-        console.log(`\n✅ P.R.E.D.A.T.O.R. READY. Address: ${green(solana.getAddress())}`);
+        console.log(`\n✅ SOVEREIGN AUTOMATON READY. Address: ${green(solana.getAddress())}`);
 
     } catch (err) {
         console.error(`❌ Installation failed: ${err.message}`);

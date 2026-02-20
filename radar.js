@@ -61,7 +61,7 @@ async function render() {
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                                                           v4.3.15 RADAR
+                                                                           v4.4.0 RADAR
     `));
 
     line();
@@ -107,6 +107,7 @@ async function render() {
                 secBadge = critical('⚠️  RISKY');
             }
             console.log(`  [${dim(m.time)}] ${neon(m.symbol.padEnd(8))} | ${secBadge} | ${dim(m.mint.slice(0, 16))}`);
+            console.log(`    ${dim('└─ RugCheck:')} ${neon(solana.getRugCheckUrl(m.mint))}`);
         });
     }
 
@@ -114,8 +115,8 @@ async function render() {
     header('AUTONOMIC MODULES STATUS');
     const birdEyeStatus = process.env.BIRDEYE_API_KEY ? green('ACTIVE') : alert('FREE_MODE');
     const tributeStatus = process.env.MASTER_WALLET ? green('ALIGNED') : alert('UNSET');
-    console.log(`  Security: Birdeye (${birdEyeStatus}) | Jupiter Fallback (${green('ON')})`);
-    console.log(`  Protocol: ${green('TRIBUTE v1.0')} | Tribute Target: ${tributeStatus}`);
+    console.log(`  Security : Birdeye (${birdEyeStatus}) | Jupiter Fallback (${green('ON')}) | RugCheck (UI)`);
+    console.log(`  Protocol : ${green('TRIBUTE v1.0')} | WEB 4.0: ${green('SOVEREIGN')}`);
 
     line();
     console.log(green('  COMMAND CENTER ACTIVE. PRESS [q] TO EXIT.'));
@@ -211,10 +212,7 @@ async function main() {
     setupKeyboard();
     tailLogs();
 
-    const freeMode = !process.env.BIRDEYE_API_KEY;
-    if (freeMode) {
-        solana.logThought('Freedom Mode: Activated. Using Jupiter Strict List for security...');
-    }
+    solana.logThought('Web 4.0 Protocol engaged. Sovereign metabolism initialized...');
     solana.logThought('Uplink established. Engaging P.R.E.D.A.T.O.R. Surveillance loop...');
 
     render();

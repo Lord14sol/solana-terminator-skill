@@ -283,6 +283,11 @@ export class SolanaAutonomy {
     return { safe: false, source: 'none' };
   }
 
+  /** Return RugCheck.xyz verification link */
+  getRugCheckUrl(mint) {
+    return `https://rugcheck.xyz/tokens/${mint}`;
+  }
+
   /** Check if token is on Jupiter's Strict List (Free & High Security) */
   async _checkJupiterStrictList(mint) {
     try {
