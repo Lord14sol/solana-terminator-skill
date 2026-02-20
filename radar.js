@@ -55,7 +55,7 @@ async function render() {
   █████  ██    ██ ██      ███████ ██ ██  ██ ███████     ██████  ███████ ██   ██ ███████ ██████  
       ██ ██    ██ ██      ██   ██ ██  ██ ██ ██   ██     ██   ██ ██   ██ ██   ██ ██   ██ ██   ██ 
  ██████   ██████  ███████ ██   ██ ██   ████ ██   ██     ██   ██ ██   ██ ██████  ██   ██ ██████  
-                                                                             v4.3.1 RADAR
+                                                                             v4.3.2 RADAR
     `));
 
     line();
@@ -134,7 +134,46 @@ function startWebSocket() {
 // ─── Entry Point ─────────────────────────────────────────────────────────────
 
 export async function bootstrap(onExit) {
+    // 1. Initialize Keyboard immediately to prevent hang-lock
+    readline.emitKeypressEvents(process.stdin);
+    if (process.stdin.isTTY) process.stdin.setRawMode(true);
+    process.stdin.resume();
+
+    const cleanup = () => {
+        intervals.forEach(clearInterval);
+        if (wsClient) wsClient.close();
+        if (process.stdin.isTTY) process.stdin.setRawMode(false);
+        process.stdin.pause();
+    };
+
+    const keyListener = (str, key) => {
+        if (key && (key.name === 'q' || (key.ctrl && key.name === 'c'))) {
+            cleanup();
+            if (key.ctrl && key.name === 'c') {
+                process.exit(0);
+            } else {
+                if (onExit) onExit();
+            }
+        }
+    };
+
+    // Fallback data listener if keypress fails
+    const dataListener = (data) => {
+        const str = data.toString();
+        if (str === 'q') {
+            cleanup();
+            process.stdin.removeListener('data', dataListener);
+            if (onExit) onExit();
+        }
+    };
+
+    process.stdin.on('keypress', keyListener);
+    process.stdin.on('data', dataListener);
+
+    // 2. Start Logic
     status.logs.push('Initializing Solana Autonomy identity...');
+    render(); // Initial empty render
+
     await updateVitals();
     startWebSocket();
 
@@ -145,28 +184,6 @@ export async function bootstrap(onExit) {
     intervals.push(interval);
 
     render();
-
-    // Listen for 'q' to exit
-    readline.emitKeypressEvents(process.stdin);
-    if (process.stdin.isTTY) process.stdin.setRawMode(true);
-
-    const keyListener = (str, key) => {
-        if (key.name === 'q' || (key.ctrl && key.name === 'c')) {
-            // Clean up
-            intervals.forEach(clearInterval);
-            if (wsClient) wsClient.close();
-            process.stdin.removeListener('keypress', keyListener);
-            if (process.stdin.isTTY) process.stdin.setRawMode(false);
-
-            if (key.ctrl && key.name === 'c') {
-                process.exit(0);
-            } else {
-                if (onExit) onExit();
-            }
-        }
-    };
-
-    process.stdin.on('keypress', keyListener);
 }
 
 // Support direct execution
