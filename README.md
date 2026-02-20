@@ -16,7 +16,7 @@ The v4.9.0 release consolidates several high-fidelity modules into a single unif
 
 ## Core Functionality
 
-The engine is governed by a singular objective: Autonomous Value Extraction.
+The engine is governed by 
 
 1. Sovereign Identity: The agent generates and manages its own unique Solana identity (wallet) located at ~/.automaton/solana-wallet.json.
 2. Tactical Metabolism: The engine autonomously manages its own fuel (SOL) and operating capital (USDC) to ensure 100% uptime.
