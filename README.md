@@ -2,7 +2,7 @@
 
 In Web 4.0, if an agent does not generate value, it does not exist.
 
-P.R.E.D.A.T.O.R. (Passive Revenue Ecosystem and Deployment of Autonomous Tactical Operations Radar) is a Sovereign Commercial Automaton designed to live on the Solana blockchain and harvest profit for its Master Creator. It operates as a native skill within the Conway Research Automaton ecosystem.
+P.R.E.D.A.T.O.R. (Passive Revenue Ecosystem and Deployment of Autonomous Tactical Operations Radar) is a Sovereign Commercial Automaton designed to live on the Solana blockchain . It operates as a native skill within the Conway Research Automaton ecosystem.
 
 ## Full Tactical Arsenal (v4.9.0)
 
