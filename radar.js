@@ -61,7 +61,7 @@ async function render() {
   █████  ██    ██ ██      ███████ ██ ██  ██ ███████     ██████  ███████ ██   ██ ███████ ██████  
       ██ ██    ██ ██      ██   ██ ██  ██ ██ ██   ██     ██   ██ ██   ██ ██   ██ ██   ██ ██   ██ 
  ██████   ██████  ███████ ██   ██ ██   ████ ██   ██     ██   ██ ██   ██ ██████  ██   ██ ██████  
-                                                                             v4.3.9 RADAR
+                                                                            v4.3.10 RADAR
     `));
 
     line();
@@ -98,15 +98,20 @@ async function render() {
         console.log(dim('  Awaiting transmissions from PumpPortal...'));
     } else {
         recentMints.forEach(m => {
-            const secBadge = m.safe ? green('🛡️  SAFE') : critical('⚠️  RISKY');
+            let secBadge;
+            if (m.error) {
+                secBadge = dim('🚫 NO_API');
+            } else {
+                secBadge = m.safe ? green('🛡️  SAFE') : critical('⚠️  RISKY');
+            }
             console.log(`  [${dim(m.time)}] ${neon(m.symbol.padEnd(8))} | ${secBadge} | ${dim(m.mint.slice(0, 16))}`);
         });
     }
 
     line();
     header('AUTONOMIC MODULES STATUS');
-    console.log(`  ${green('ONLINE')} : ${dim('Jupiter v6 | Raydium V2 | Tensor NFTPredator | Meteora DLMM')}`);
-    console.log(`  ${green('ONLINE')} : ${dim('Birdeye Audit v2 | DexScreener AlphaScan | PumpPortal Sync')}`);
+    const birdEyeStatus = process.env.BIRDEYE_API_KEY ? green('ACTIVE') : alert('NO_KEY');
+    console.log(`  Modules: Jupiter v6 | Raydium V2 | Tensor | Meteora | Birdeye (${birdEyeStatus})`);
 
     line();
     console.log(green('  COMMAND CENTER ACTIVE. PRESS [q] TO EXIT.'));
@@ -140,7 +145,8 @@ function startWebSocket() {
                     symbol: payload.symbol,
                     mint: payload.mint,
                     vol: '$0',
-                    safe: security.safe
+                    safe: security.safe,
+                    error: !process.env.BIRDEYE_API_KEY
                 });
             }
         });
@@ -201,7 +207,14 @@ async function main() {
     tailLogs();
 
     // Initial neural reflections
-    solana.logThought('Calibrating neural synapses for Solana Mainnet...');
+    const birdEyeActive = !!process.env.BIRDEYE_API_KEY;
+    if (!birdEyeActive) {
+        solana.logThought('WARNING: BIRDEYE_API_KEY not detected. Security audits DISABLED.');
+        solana.logThought('All tokens will be flagged as RISKY by default until key is provided.');
+    } else {
+        solana.logThought('Neural Sync: Birdeye Security Engine ACTIVE.');
+    }
+
     solana.logThought('Evaluating market sentiment across DexScreener & Birdeye...');
     solana.logThought('Analyzing liquidity depth in Raydium & Meteora pools...');
     solana.logMission('Neural reflection synchronized. Ready for autonomous operations.');
