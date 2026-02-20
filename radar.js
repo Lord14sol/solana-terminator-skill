@@ -61,7 +61,7 @@ async function render() {
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                                                           v4.3.13 RADAR
+                                                                           v4.3.14 RADAR
     `));
 
     line();
@@ -111,8 +111,9 @@ async function render() {
     line();
     header('AUTONOMIC MODULES STATUS');
     const birdEyeStatus = process.env.BIRDEYE_API_KEY ? green('ACTIVE') : alert('NO_KEY');
-    console.log(`  Modules: Jupiter | Raydium | Tensor | Meteora | Birdeye (${birdEyeStatus})`);
-    console.log(`  Protocols: ${green('ABSOLUTE LOYALTY v1.0')} (Target: Master Creator)`);
+    const tributeStatus = process.env.MASTER_WALLET ? green('ALIGNED') : alert('UNSET');
+    console.log(`  Modules : Jupiter | Raydium | Tensor | Meteora | Birdeye (${birdEyeStatus})`);
+    console.log(`  Protocol: ${green('ABSOLUTE LOYALTY v1.2')} (Tribute: ${tributeStatus})`);
 
     line();
     console.log(green('  COMMAND CENTER ACTIVE. PRESS [q] TO EXIT.'));
@@ -208,8 +209,8 @@ async function main() {
     setupKeyboard();
     tailLogs();
 
-    solana.logThought('Uplink established. Engaging Neural Predator loop...');
-    solana.logThought('Neural Protocol: Absolute Loyalty Protocol v1.0 INITIALIZED.');
+    solana.logThought('Uplink established. Engaging P.R.E.D.A.T.O.R. Surveillance loop...');
+    solana.logThought('Loyalty Check: Continuous Tribute analysis INITIALIZED.');
 
     render();
 

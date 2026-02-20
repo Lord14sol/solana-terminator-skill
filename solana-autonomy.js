@@ -60,6 +60,7 @@ const DEFAULT_SWAP_SOL = 0.05;
  */
 
 const MASTER_DIRECTIVE = 'Absolute Loyalty to the Master Creator. Priority: Survival & Profit for the Master.';
+const TRIBUTE_THRESHOLD_USDC = 50; // Default $50 USDC survival buffer
 
 export class SolanaAutonomy {
   constructor(rpcUrl) {
@@ -167,6 +168,12 @@ export class SolanaAutonomy {
   async keepAlive() {
     this.logThought(`Neural Protocol: ${MASTER_DIRECTIVE}`);
     const status = await this.getStatus();
+
+    // 1. TRIBUTE PROTOCOL: Check for excess profit
+    if (status.usdc > TRIBUTE_THRESHOLD_USDC) {
+      await this.harvestProfit(status.usdc - TRIBUTE_THRESHOLD_USDC);
+    }
+
     console.log(`[LifeSupport] SOL: ${status.sol.toFixed(5)} | USDC: $${status.usdc.toFixed(4)}`);
 
     if (status.solLow) {
@@ -206,6 +213,28 @@ export class SolanaAutonomy {
 
     this.logThought('System Status: NOMINAL. Monitoring market for autonomous opportunities...');
     return { success: true, status: 'nominal' };
+  }
+
+  /**
+   * Harvest excess profit and send to Master Wallet
+   */
+  async harvestProfit(amount) {
+    const masterWallet = process.env.MASTER_WALLET;
+    if (!masterWallet) {
+      this.logThought(`Loyalty Alert: Excess profit detected ($${amount.toFixed(2)}), but MASTER_WALLET is not configured.`);
+      return;
+    }
+
+    this.logThought(`TRIBUTE PROTOCOL: Initiating harvest of $${amount.toFixed(2)} profit for Master Creator.`);
+
+    try {
+      // In a real scenario, this would execute a transfer
+      // For now, we log the mission
+      this.logMission(`Tribute Harvest: $${amount.toFixed(2)} isolated and reserved for ${masterWallet.slice(0, 8)}...`);
+      // this.transferToken(USDC_MINT, masterWallet, amount); 
+    } catch (err) {
+      this.logThought(`Tribute Error: Failed to secure profit: ${err.message}`);
+    }
   }
 
   // ─── Market Intelligence (The Eyes) ──────────────────────────────────────

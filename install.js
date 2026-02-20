@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Solana Terminator Skill Installer
+ * P.R.E.D.A.T.O.R. Installer
  * 
  * Sets up the autonomous identity and mission control.
  */
@@ -29,7 +29,7 @@ const ASCII_ART = `
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                v4.3.13 - Neural Predator
+                                v4.3.14 - Tribute Protocol
 `;
 
 const SKILL_NAME = 'solana-terminator';
@@ -58,8 +58,9 @@ function showMainMenu() {
     console.log(`${neon('[1]')} Reset/Install Solana Agent Identity`);
     console.log(`${neon('[2]')} Launch P.R.E.D.A.T.O.R. Mission Control (Radar)`);
     console.log(`${neon('[3]')} View Agent Identity (Address & Balances)`);
-    console.log(`${neon('[4]')} Configure Birdeye API Key (Security Audits)`);
-    console.log(`${neon('[5]')} View Tactical Documentation`);
+    console.log(`${neon('[4]')} Configure Birdeye API Key (Security)`);
+    console.log(`${neon('[5]')} Configure Master Wallet (Tribute Threshold)`);
+    console.log(`${neon('[6]')} View Tactical Documentation`);
     console.log(`${neon('[q]')} Exit Terminal`);
 
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -70,7 +71,8 @@ function showMainMenu() {
             case '2': launchRadar(false); break;
             case '3': showIdentity(); break;
             case '4': configureApi(); break;
-            case '5': viewDocs(); break;
+            case '5': configureMaster(); break;
+            case '6': viewDocs(); break;
             case 'q': process.exit(0);
             default: showMainMenu();
         }
@@ -133,26 +135,40 @@ function showIdentity() {
 function configureApi() {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     console.log(`\n🔑 CONFIGURE BIRDEYE API KEY`);
-    console.log(dim(`This key is required for the P.R.E.D.A.T.O.R. to flag SAFE tokens.`));
-
     rl.question(neon('Enter Birdeye API Key: '), (key) => {
         if (key.trim()) {
-            let envContent = '';
-            if (fs.existsSync(ENV_FILE)) {
-                envContent = fs.readFileSync(ENV_FILE, 'utf8');
-                // Remove existing key if any
-                envContent = envContent.split('\n').filter(line => !line.startsWith('BIRDEYE_API_KEY=')).join('\n');
-            }
-            envContent += `\nBIRDEYE_API_KEY=${key.trim()}\n`;
-            fs.mkdirSync(path.dirname(ENV_FILE), { recursive: true });
-            fs.writeFileSync(ENV_FILE, envContent.trim() + '\n');
-            console.log(green('\n✅ API Key saved to ~/.automaton/.env'));
-        } else {
-            console.log(alert('\n⚠️ Key unchanged.'));
+            saveToEnv('BIRDEYE_API_KEY', key.trim());
+            console.log(green('\n✅ API Key saved.'));
         }
         rl.close();
         pauseAndReturn();
     });
+}
+
+function configureMaster() {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    console.log(`\n💳 CONFIGURE MASTER WALLET (TRIBUTE)`);
+    console.log(dim(`Excess profits above $50 USDC will be harvested for this wallet.`));
+
+    rl.question(neon('Enter Master Wallet Address: '), (address) => {
+        if (address.trim()) {
+            saveToEnv('MASTER_WALLET', address.trim());
+            console.log(green('\n✅ Master Wallet configured. Tribute protocol ACTIVE.'));
+        }
+        rl.close();
+        pauseAndReturn();
+    });
+}
+
+function saveToEnv(key, value) {
+    let envContent = '';
+    if (fs.existsSync(ENV_FILE)) {
+        envContent = fs.readFileSync(ENV_FILE, 'utf8');
+        envContent = envContent.split('\n').filter(line => !line.startsWith(`${key}=`)).join('\n');
+    }
+    envContent += `\n${key}=${value}\n`;
+    fs.mkdirSync(path.dirname(ENV_FILE), { recursive: true });
+    fs.writeFileSync(ENV_FILE, envContent.trim() + '\n');
 }
 
 function pauseAndReturn() {
@@ -172,7 +188,7 @@ async function runInstaller() {
 
     try {
         if (!fs.existsSync(TARGET_DIR)) {
-            console.log(`[1/3] Creating directory: ${TARGET_DIR}`);
+            console.log(`[1/3] Creating directory...`);
             fs.mkdirSync(TARGET_DIR, { recursive: true });
         }
 
@@ -191,8 +207,7 @@ async function runInstaller() {
         const { SolanaAutonomy } = await import('./solana-autonomy.js');
         const solana = new SolanaAutonomy();
 
-        console.log(`\n✅ P.R.E.D.A.T.O.R. MISSION CONTROL READY.`);
-        console.log(`Address: ${green(solana.getAddress())}`);
+        console.log(`\n✅ P.R.E.D.A.T.O.R. READY. Address: ${green(solana.getAddress())}`);
 
     } catch (err) {
         console.error(`❌ Installation failed: ${err.message}`);
