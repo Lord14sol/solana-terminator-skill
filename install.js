@@ -24,7 +24,7 @@ const ASCII_ART = `
     ██    ██████   ████████ ████ ████ ██ ████  ██ ███████    ██    ██    ██ ██████  
     ██    ██       ██  ██   ██ ██  ██ ██ ██ ██ ██ ██   ██    ██    ██    ██ ██  ██  
     ██    ████████ ██   ██  ██     ██ ██ ██  ████ ██   ██    ██     ██████  ██   ██ 
-                                v4.3.3 - Autonomous Engine
+                                v4.3.4 - Autonomous Engine
 `;
 
 const SKILL_NAME = 'solana-terminator';
@@ -107,8 +107,9 @@ function showIdentity() {
         import('./solana-autonomy.js').then(async ({ SolanaAutonomy }) => {
             const solana = new SolanaAutonomy();
             const status = await solana.getStatus();
-            console.log(`\n✅ AGENT IDENTITY FOUND`);
+            console.log(`\n✅ AGENT SOLANA IDENTITY FOUND`);
             console.log(`--------------------------------------------------`);
+            console.log(`NETWORK : Solana Mainnet-Beta`);
             console.log(`ADDRESS : ${status.address}`);
             console.log(`SOL     : ${status.sol.toFixed(4)}`);
             console.log(`USDC    : $${status.usdc.toFixed(2)}`);
