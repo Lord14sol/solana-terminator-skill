@@ -27,7 +27,7 @@ const ASCII_ART = `
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                v4.5.0 - Pure Survival Edition
+                                v4.5.1 - Pure Survival Edition
 `;
 
 const SKILL_NAME = 'solana-terminator';
@@ -56,8 +56,8 @@ function showMainMenu() {
     console.log(`${neon('[1]')} Reset/Install Identity (Wallet)`);
     console.log(`${neon('[2]')} Launch Radar (Autonomous Monitor)`);
     console.log(`${neon('[3]')} View Balance & Identity`);
-    console.log(`${neon('[4]')} Configure Birdeye API Key`);
-    console.log(`${neon('[5]')} Configure Master Wallet (Tribute)`);
+    console.log(`${neon('[4]')} Configure Pro Intel (Optional API)`);
+    console.log(`${neon('[5]')} Set Master Vault Address (Mandatory for Profit Harvesting)`);
     console.log(`${neon('[q]')} Exit`);
 
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });

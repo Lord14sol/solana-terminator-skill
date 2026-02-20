@@ -61,7 +61,7 @@ async function render() {
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                                                           v4.5.0 RADAR
+                                                                           v4.5.1 RADAR
     `));
 
     line();
@@ -112,10 +112,10 @@ async function render() {
 
     line();
     header('AUTONOMOUS MODULES');
-    const birdEyeStatus = process.env.BIRDEYE_API_KEY ? green('ACTIVE') : alert('FREE_MODE');
-    const tributeStatus = process.env.MASTER_WALLET ? green('ALIGNED') : alert('UNSET');
-    console.log(`  Security: Birdeye (${birdEyeStatus}) | Jupiter Fallback (${green('ON')})`);
-    console.log(`  Protocol: ${green('TRIBUTE')} | Tribute Target: ${tributeStatus}`);
+    const securityStatus = process.env.BIRDEYE_API_KEY ? green('Pro Intelligence') : alert('Standard (Jupiter Fallback)');
+    const vaultStatus = process.env.MASTER_WALLET ? green('ACTIVE') : critical('⚠️  OFF (Set address in Menu)');
+    console.log(`  Security: ${securityStatus}`);
+    console.log(`  Vault   : ${vaultStatus}`);
 
     line();
     console.log(green('  RADAR ACTIVE. PRESS [q] TO EXIT.'));
