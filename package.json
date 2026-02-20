@@ -1,6 +1,6 @@
 {
   "name": "solana-terminator-skill",
-  "version": "4.8.1",
+  "version": "4.8.2",
   "description": "Autonomous survival tool with interactive mission control.",
   "main": "solana-autonomy.js",
   "type": "module",

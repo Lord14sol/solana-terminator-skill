@@ -34,7 +34,7 @@ const ASCII_ART = `
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                v4.8.1 - Hardened Architecture
+                                v4.8.2 - Hardened Architecture
 `;
 
 // ─── Interactive State ──────────────────────────────────────────────────────
@@ -110,7 +110,7 @@ function setupKeyboard() {
 async function launchRadar(isDirect = false) {
     try {
         const radarPath = path.join(__dirname, 'radar.js');
-        spawnSync('node', [radarPath], { stdio: 'inherit', shell: true });
+        spawnSync('node', [radarPath], { stdio: 'inherit' });
         if (!isDirect) {
             isMenuMode = true;
             process.stdin.setRawMode(true);
