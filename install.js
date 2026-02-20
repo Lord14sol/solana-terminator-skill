@@ -29,7 +29,7 @@ const ASCII_ART = `
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                v4.3.14 - Tribute Protocol
+                                v4.3.15 - Freedom Update
 `;
 
 const SKILL_NAME = 'solana-terminator';

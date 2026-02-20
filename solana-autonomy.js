@@ -254,19 +254,43 @@ export class SolanaAutonomy {
     }
   }
 
-  /** Run security rug-check via Birdeye. Scores > 80 are "Safe". */
+  /** Birdeye rug-check with free fallbacks. */
   async auditTokenSecurity(mint) {
+    // 1. Try Birdeye (Best, if key exists)
     const apiKey = process.env.BIRDEYE_API_KEY;
-    if (!apiKey) return { score: 50, safe: false }; // safe default if no key
+    if (apiKey) {
+      try {
+        const response = await axios.get(`https://public-api.birdeye.so/defi/token_security?address=${mint}`, {
+          headers: { 'X-API-KEY': apiKey, 'x-chain': 'solana' }
+        });
+        const data = response.data.data;
+        return {
+          safe: data.owner_renounced && data.liquidity_locked,
+          source: 'birdeye'
+        };
+      } catch (e) {
+        // Fallback to free methods on error
+      }
+    }
+
+    // 2. Free Fallback: Jupiter Strict List
     try {
-      const { data } = await axios.get(`${BIRDEYE_API}/defi/token_security`, {
-        params: { address: mint },
-        headers: { 'X-API-KEY': apiKey, 'x-chain': 'solana' },
-      });
-      const score = data.data?.security_score || 0;
-      return { score, safe: score >= 80 };
-    } catch {
-      return { score: 0, safe: false };
+      const isVerified = await this._checkJupiterStrictList(mint);
+      if (isVerified) return { safe: true, source: 'jupiter_strict' };
+    } catch (e) { }
+
+    // 3. Last Resort: Default to false
+    return { safe: false, source: 'none' };
+  }
+
+  /** Check if token is on Jupiter's Strict List (Free & High Security) */
+  async _checkJupiterStrictList(mint) {
+    try {
+      const response = await axios.get('https://token.jup.ag/strict');
+      const tokens = response.data;
+      return tokens.some(t => t.address === mint);
+    } catch (e) {
+      return false;
     }
   }
 

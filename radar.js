@@ -61,7 +61,7 @@ async function render() {
  ██████  ██████  █████   ██   ██ ███████    ██    ██    ██ ██████  
  ██      ██   ██ ██      ██   ██ ██   ██    ██    ██    ██ ██   ██ 
  ██      ██   ██ ███████ ██████  ██   ██    ██     ██████  ██   ██ 
-                                                                           v4.3.14 RADAR
+                                                                           v4.3.15 RADAR
     `));
 
     line();
@@ -99,10 +99,12 @@ async function render() {
     } else {
         recentMints.forEach(m => {
             let secBadge;
-            if (m.error) {
-                secBadge = dim('🚫 NO_API');
-            } else {
+            if (m.source === 'jupiter_strict') {
+                secBadge = green('🛡️  VERIF');
+            } else if (m.source === 'birdeye') {
                 secBadge = m.safe ? green('🛡️  SAFE') : critical('⚠️  RISKY');
+            } else {
+                secBadge = critical('⚠️  RISKY');
             }
             console.log(`  [${dim(m.time)}] ${neon(m.symbol.padEnd(8))} | ${secBadge} | ${dim(m.mint.slice(0, 16))}`);
         });
@@ -110,10 +112,10 @@ async function render() {
 
     line();
     header('AUTONOMIC MODULES STATUS');
-    const birdEyeStatus = process.env.BIRDEYE_API_KEY ? green('ACTIVE') : alert('NO_KEY');
+    const birdEyeStatus = process.env.BIRDEYE_API_KEY ? green('ACTIVE') : alert('FREE_MODE');
     const tributeStatus = process.env.MASTER_WALLET ? green('ALIGNED') : alert('UNSET');
-    console.log(`  Modules : Jupiter | Raydium | Tensor | Meteora | Birdeye (${birdEyeStatus})`);
-    console.log(`  Protocol: ${green('ABSOLUTE LOYALTY v1.2')} (Tribute: ${tributeStatus})`);
+    console.log(`  Security: Birdeye (${birdEyeStatus}) | Jupiter Fallback (${green('ON')})`);
+    console.log(`  Protocol: ${green('TRIBUTE v1.0')} | Tribute Target: ${tributeStatus}`);
 
     line();
     console.log(green('  COMMAND CENTER ACTIVE. PRESS [q] TO EXIT.'));
@@ -149,7 +151,7 @@ function startWebSocket() {
                     mint: payload.mint,
                     vol: '$0',
                     safe: security.safe,
-                    error: !process.env.BIRDEYE_API_KEY
+                    source: security.source
                 });
             }
         });
@@ -209,8 +211,11 @@ async function main() {
     setupKeyboard();
     tailLogs();
 
+    const freeMode = !process.env.BIRDEYE_API_KEY;
+    if (freeMode) {
+        solana.logThought('Freedom Mode: Activated. Using Jupiter Strict List for security...');
+    }
     solana.logThought('Uplink established. Engaging P.R.E.D.A.T.O.R. Surveillance loop...');
-    solana.logThought('Loyalty Check: Continuous Tribute analysis INITIALIZED.');
 
     render();
 
