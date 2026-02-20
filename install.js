@@ -24,7 +24,7 @@ const ASCII_ART = `
     ██    ██████   ████████ ████ ████ ██ ████  ██ ███████    ██    ██    ██ ██████  
     ██    ██       ██  ██   ██ ██  ██ ██ ██ ██ ██ ██   ██    ██    ██    ██ ██  ██  
     ██    ████████ ██   ██  ██     ██ ██ ██  ████ ██   ██    ██     ██████  ██   ██ 
-                                v4.3.8 - Autonomous Engine
+                                v4.3.9 - Autonomous Engine
 `;
 
 const SKILL_NAME = 'solana-terminator';
