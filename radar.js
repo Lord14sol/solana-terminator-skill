@@ -55,7 +55,7 @@ async function render() {
   █████  ██    ██ ██      ███████ ██ ██  ██ ███████     ██████  ███████ ██   ██ ███████ ██████  
       ██ ██    ██ ██      ██   ██ ██  ██ ██ ██   ██     ██   ██ ██   ██ ██   ██ ██   ██ ██   ██ 
  ██████   ██████  ███████ ██   ██ ██   ████ ██   ██     ██   ██ ██   ██ ██████  ██   ██ ██████  
-                                                                             v4.3.2 RADAR
+                                                                             v4.3.3 RADAR
     `));
 
     line();
@@ -84,7 +84,7 @@ async function render() {
 
     line();
     console.log(green('  COMMAND CENTER ACTIVE. REASONING IN PROGRESS...'));
-    console.log(dim('  Press [q] to return to menu | [Ctrl+C] to quit'));
+    console.log(dim('  Press [q] to return | [Ctrl+C] to exit dashboard'));
 }
 
 // ─── Logic ──────────────────────────────────────────────────────────────────
@@ -133,46 +133,25 @@ function startWebSocket() {
 
 // ─── Entry Point ─────────────────────────────────────────────────────────────
 
-export async function bootstrap(onExit) {
-    // 1. Initialize Keyboard immediately to prevent hang-lock
-    readline.emitKeypressEvents(process.stdin);
-    if (process.stdin.isTTY) process.stdin.setRawMode(true);
-    process.stdin.resume();
-
-    const cleanup = () => {
-        intervals.forEach(clearInterval);
-        if (wsClient) wsClient.close();
-        if (process.stdin.isTTY) process.stdin.setRawMode(false);
-        process.stdin.pause();
-    };
-
-    const keyListener = (str, key) => {
-        if (key && (key.name === 'q' || (key.ctrl && key.name === 'c'))) {
-            cleanup();
-            if (key.ctrl && key.name === 'c') {
+async function main() {
+    // Enable simple 'q' reading via raw mode
+    if (process.stdin.isTTY) {
+        process.stdin.setRawMode(true);
+        process.stdin.resume();
+        process.stdin.setEncoding('utf8');
+        process.stdin.on('data', (key) => {
+            if (key === 'q' || key === '\u0003') { // q or Ctrl+C
+                intervals.forEach(clearInterval);
+                if (wsClient) wsClient.close();
+                process.stdin.setRawMode(false);
+                process.stdin.pause();
                 process.exit(0);
-            } else {
-                if (onExit) onExit();
             }
-        }
-    };
+        });
+    }
 
-    // Fallback data listener if keypress fails
-    const dataListener = (data) => {
-        const str = data.toString();
-        if (str === 'q') {
-            cleanup();
-            process.stdin.removeListener('data', dataListener);
-            if (onExit) onExit();
-        }
-    };
-
-    process.stdin.on('keypress', keyListener);
-    process.stdin.on('data', dataListener);
-
-    // 2. Start Logic
     status.logs.push('Initializing Solana Autonomy identity...');
-    render(); // Initial empty render
+    render();
 
     await updateVitals();
     startWebSocket();
@@ -186,7 +165,7 @@ export async function bootstrap(onExit) {
     render();
 }
 
-// Support direct execution
-if (import.meta.url === `file://${process.argv[1]}`) {
-    bootstrap(() => process.exit(0));
-}
+main().catch(err => {
+    console.error(critical(`FATAL ERROR: ${err.message}`));
+    process.exit(1);
+});

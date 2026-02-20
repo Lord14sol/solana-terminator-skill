@@ -6,7 +6,7 @@
  * Automates the setup of the Solana skill for the Conway Automaton.
  */
 
-import { execSync } from 'child_process';
+import { execSync, spawnSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -24,7 +24,7 @@ const ASCII_ART = `
     ██    ██████   ████████ ████ ████ ██ ████  ██ ███████    ██    ██    ██ ██████  
     ██    ██       ██  ██   ██ ██  ██ ██ ██ ██ ██ ██   ██    ██    ██    ██ ██  ██  
     ██    ████████ ██   ██  ██     ██ ██ ██  ████ ██   ██    ██     ██████  ██   ██ 
-                                v4.3.2 - Autonomous Engine
+                                v4.3.3 - Autonomous Engine
 `;
 
 const SKILL_NAME = 'solana-terminator';
@@ -32,10 +32,8 @@ const TARGET_DIR = path.join(os.homedir(), '.automaton', 'skills', SKILL_NAME);
 
 // ─── Command Routing ────────────────────────────────────────────────────────
 
-const args = process.argv.slice(2);
-
 if (args.includes('radar')) {
-    launchRadar();
+    launchRadar(true);
 } else if (args.includes('install')) {
     runInstaller();
 } else {
@@ -44,11 +42,22 @@ if (args.includes('radar')) {
 
 // ─── Logic ─────────────────────────────────────────────────────────────
 
-async function launchRadar() {
-    const { bootstrap } = await import('./radar.js');
-    bootstrap(() => {
-        showMainMenu();
-    });
+function launchRadar(isDirect = false) {
+    try {
+        const radarPath = path.join(__dirname, 'radar.js');
+        // subprocess with 'inherit' is the most robust way to handle interactive CLI keys
+        spawnSync('node', [radarPath], { stdio: 'inherit' });
+
+        // Return to menu ONLY if not direct command line 'radar' call
+        if (!isDirect) {
+            showMainMenu();
+        } else {
+            process.exit(0);
+        }
+    } catch (e) {
+        if (!isDirect) showMainMenu();
+        else process.exit(1);
+    }
 }
 
 // ─── Menu System ────────────────────────────────────────────────────────────

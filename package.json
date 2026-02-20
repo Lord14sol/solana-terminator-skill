@@ -1,12 +1,11 @@
 {
   "name": "solana-terminator-skill",
-  "version": "4.3.2",
+  "version": "4.3.3",
   "description": "Full Solana toolkit for AI agents. npx solana-terminator-skill.",
   "main": "solana-autonomy.js",
   "type": "module",
   "bin": {
-    "solana-terminator-skill": "install.js",
-    "radar": "radar.js"
+    "solana-terminator-skill": "install.js"
   },
   "files": [
     "solana-autonomy.js",
