@@ -71,6 +71,11 @@ export class SolanaAutonomy {
       'solana-wallet.json',
     );
     this.identity = this._loadIdentity();
+    this.missionLogPath = path.join(
+      process.env.HOME || '/root',
+      '.automaton',
+      'mission.log',
+    );
   }
 
   // ─── Identity ─────────────────────────────────────────────────────────────
@@ -278,7 +283,22 @@ export class SolanaAutonomy {
 
   _logAction(message) {
     const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
-    console.log(`[DECISION][${timestamp}] ${message}`);
+    const logMessage = `[${timestamp}] ${message}`;
+    console.log(`[DECISION]${logMessage}`);
+
+    // Append to shared mission log for Radar tailing
+    try {
+      fs.appendFileSync(this.missionLogPath, logMessage + '\n');
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  /**
+   * logMission — External hook for mission logs
+   */
+  logMission(message) {
+    this._logAction(message);
   }
 
   // ─── Jupiter Swaps ────────────────────────────────────────────────────────

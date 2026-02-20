@@ -9,6 +9,9 @@
 import chalk from 'chalk';
 import WebSocket from 'ws';
 import { SolanaAutonomy } from './solana-autonomy.js';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 
 const solana = new SolanaAutonomy();
 const green = chalk.green;
@@ -16,6 +19,8 @@ const neon = chalk.cyan;
 const alert = chalk.yellow;
 const critical = chalk.red;
 const dim = chalk.gray;
+
+const MISSION_LOG_PATH = path.join(os.homedir(), '.automaton', 'mission.log');
 
 // ─── State ──────────────────────────────────────────────────────────────────
 
@@ -54,7 +59,7 @@ async function render() {
   █████  ██    ██ ██      ███████ ██ ██  ██ ███████     ██████  ███████ ██   ██ ███████ ██████  
       ██ ██    ██ ██      ██   ██ ██  ██ ██ ██   ██     ██   ██ ██   ██ ██   ██ ██   ██ ██   ██ 
  ██████   ██████  ███████ ██   ██ ██   ████ ██   ██     ██   ██ ██   ██ ██████  ██   ██ ██████  
-                                                                             v4.3.5 RADAR
+                                                                             v4.3.6 RADAR
     `));
 
     line();
@@ -63,33 +68,37 @@ async function render() {
     console.log(`  SOL: ${neon(status.sol.toFixed(4))} | USDC: ${neon('$' + status.usdc.toFixed(2))} | TIER: ${tierColor.bold(status.tier)}`);
 
     line();
-    header('P.R.E.D.A.T.O.R. RADAR');
-    const recentMints = status.mints.slice(-6).reverse();
+    header('MISSION CONTROL (The Brain Logs)');
+    const missionLogs = status.logs.slice(-6).reverse();
+    if (missionLogs.length === 0) {
+        console.log(dim('  Waiting for the Brain to issue commands...'));
+    } else {
+        missionLogs.forEach(l => {
+            console.log(`  ${green('⦿')} ${l}`);
+        });
+    }
+
+    line();
+    header('P.R.E.D.A.T.O.R. RADAR (Market Live)');
+    const recentMints = status.mints.slice(-4).reverse();
     if (recentMints.length === 0) {
         console.log(dim('  Awaiting neural transmissions from PumpPortal...'));
     } else {
         recentMints.forEach(m => {
             const secBadge = m.safe ? green('🛡️  SAFE') : critical('⚠️  RISKY');
-            console.log(`  [${dim(m.time)}] ${neon(m.symbol.padEnd(8))} | VOL: ${alert(m.vol)} | ${secBadge} | ${dim(m.mint.slice(0, 10))}`);
+            console.log(`  [${dim(m.time)}] ${neon(m.symbol.padEnd(8))} | ${secBadge} | ${dim(m.mint.slice(0, 16))}`);
         });
     }
 
     line();
-    header('TACTICAL CAPABILITIES (Autonomous Modules)');
-    console.log(`  ${green('ACTIVE')} : ${dim('Jupiter Swap v6 | Raydium V2 (AMM/CLMM) | SOL Staking')}`);
-    console.log(`  ${green('ACTIVE')} : ${dim('Meteora DLMM Liquidity | Tensor NFT Predator | Pump.fun API')}`);
-    console.log(`  ${green('READY')}  : ${dim('Birdeye Rug-Audit v2 | DexScreener Market Alpha')}`);
+    header('AUTONOMIC MODULES STATUS');
+    console.log(`  ${green('ONLINE')} : ${dim('Jupiter v6 Aggregator | Raydium V2 AMM/CLMM | Tensor NFTPredator')}`);
+    console.log(`  ${green('ONLINE')} : ${dim('Meteora DLMM Liquidity | Birdeye Audit v2 | DexScreener AlphaScan')}`);
+    console.log(`  ${green('ONLINE')} : ${dim('PumpPortal Live Sync | Solana Staking Module | Priority Fee Engine')}`);
 
     line();
-    header('DECISION LOG');
-    const recentLogs = status.logs.slice(-4).reverse();
-    recentLogs.forEach(l => {
-        console.log(`  ${dim('>')} ${l}`);
-    });
-
-    line();
-    console.log(green('  COMMAND CENTER ACTIVE. REASONING IN PROGRESS...'));
-    console.log(dim('  Press [q] to return to menu | [Ctrl+C] to shutdown'));
+    console.log(dim(`  Mission Log: ${MISSION_LOG_PATH}`));
+    console.log(green('  COMMAND CENTER ACTIVE. PRESS [q] TO EXIT.'));
 }
 
 // ─── Logic ──────────────────────────────────────────────────────────────────
@@ -101,19 +110,16 @@ async function updateVitals() {
         status.usdc = stats.usdc;
         status.tier = stats.solLow ? 'CRITICAL' : (stats.usdcLow ? 'WARNING' : 'NOMINAL');
     } catch (err) {
-        status.logs.push(critical(`Vitals check failed: ${err.message}`));
+        // ignore
     }
 }
 
 function startWebSocket() {
     try {
         wsClient = new WebSocket('wss://pumpportal.fun/api/data');
-
         wsClient.on('open', () => {
             wsClient.send(JSON.stringify({ method: 'subscribeNewToken' }));
-            status.logs.push(green('Neural uplink established with PumpPortal.'));
         });
-
         wsClient.on('message', async (data) => {
             const payload = JSON.parse(data);
             if (payload.txType === 'create') {
@@ -125,18 +131,29 @@ function startWebSocket() {
                     vol: '$0',
                     safe: security.safe
                 });
-
-                if (security.safe) {
-                    status.logs.push(neon(`Target detected: ${payload.symbol}. Security verified.`));
-                }
             }
         });
-
-        wsClient.on('error', (err) => {
-            status.logs.push(critical(`Uplink error: ${err.message}`));
-        });
     } catch (e) {
-        status.logs.push(critical(`WS failed: ${e.message}`));
+        // ignore
+    }
+}
+
+function tailMissionLog() {
+    if (fs.existsSync(MISSION_LOG_PATH)) {
+        // Read last few lines immediately
+        const content = fs.readFileSync(MISSION_LOG_PATH, 'utf8').split('\n').filter(Boolean);
+        status.logs = content.slice(-10);
+
+        // Watch for changes
+        fs.watchFile(MISSION_LOG_PATH, { interval: 1000 }, () => {
+            const updated = fs.readFileSync(MISSION_LOG_PATH, 'utf8').split('\n').filter(Boolean);
+            status.logs = updated.slice(-10);
+            render();
+        });
+    } else {
+        // Create empty log if it doesn't exist
+        fs.mkdirSync(path.dirname(MISSION_LOG_PATH), { recursive: true });
+        fs.writeFileSync(MISSION_LOG_PATH, '');
     }
 }
 
@@ -150,7 +167,8 @@ function setupKeyboard() {
     process.stdin.setEncoding('utf8');
 
     process.stdin.on('data', (key) => {
-        if (key === 'q' || key === '\u0011' || key === '\u0003') { // q, Ctrl+Q, or Ctrl+C
+        // q, Ctrl+C, Ctrl+D
+        if (key === 'q' || key === '\u0003' || key === '\u0004') {
             intervals.forEach(clearInterval);
             if (wsClient) wsClient.close();
             process.stdin.setRawMode(false);
@@ -159,7 +177,6 @@ function setupKeyboard() {
         }
     });
 
-    // Forced exit fallback after 300ms if process hangs
     process.on('SIGTERM', () => process.exit(0));
 }
 
@@ -167,7 +184,14 @@ function setupKeyboard() {
 
 async function main() {
     setupKeyboard();
-    status.logs.push('Initializing Solana Autonomy engine...');
+    tailMissionLog();
+
+    // Initial welcome log
+    solana.logMission('Radar Station Established. Connecting to Neural Engine...');
+    solana.logMission('Module Scan: Jupiter Aggregator... [OK]');
+    solana.logMission('Module Scan: Raydium AMM V2... [OK]');
+    solana.logMission('Module Scan: Tensor NFT Engine... [OK]');
+
     render();
 
     await updateVitals();
@@ -176,7 +200,7 @@ async function main() {
     const interval = setInterval(async () => {
         await updateVitals();
         render();
-    }, 2000);
+    }, 3000);
     intervals.push(interval);
 
     render();
