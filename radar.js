@@ -61,7 +61,7 @@ async function render() {
   █████  ██    ██ ██      ███████ ██ ██  ██ ███████     ██████  ███████ ██   ██ ███████ ██████  
       ██ ██    ██ ██      ██   ██ ██  ██ ██ ██   ██     ██   ██ ██   ██ ██   ██ ██   ██ ██   ██ 
  ██████   ██████  ███████ ██   ██ ██   ████ ██   ██     ██   ██ ██   ██ ██████  ██   ██ ██████  
-                                                                            v4.3.10 RADAR
+                                                                            v4.3.11 RADAR
     `));
 
     line();
@@ -84,7 +84,7 @@ async function render() {
     header('MISSION CONTROL (The Brain Logs)');
     const missionLogs = status.missionLogs.slice(-4).reverse();
     if (missionLogs.length === 0) {
-        console.log(dim('  Waiting for the Brain to issue commands...'));
+        console.log(dim('  Waiting for the Brain to issue misiones...'));
     } else {
         missionLogs.forEach(l => {
             console.log(`  ${green('⦿')} ${l}`);
@@ -119,8 +119,10 @@ async function render() {
 
 // ─── Logic ──────────────────────────────────────────────────────────────────
 
-async function updateVitals() {
+async function runAutonomousCycle() {
     try {
+        // This triggers the actual 'Brain' logic in the dashboard
+        await solana.keepAlive();
         const stats = await solana.getStatus();
         status.sol = stats.sol;
         status.usdc = stats.usdc;
@@ -206,29 +208,25 @@ async function main() {
     setupKeyboard();
     tailLogs();
 
-    // Initial neural reflections
-    const birdEyeActive = !!process.env.BIRDEYE_API_KEY;
-    if (!birdEyeActive) {
-        solana.logThought('WARNING: BIRDEYE_API_KEY not detected. Security audits DISABLED.');
-        solana.logThought('All tokens will be flagged as RISKY by default until key is provided.');
-    } else {
-        solana.logThought('Neural Sync: Birdeye Security Engine ACTIVE.');
-    }
-
-    solana.logThought('Evaluating market sentiment across DexScreener & Birdeye...');
-    solana.logThought('Analyzing liquidity depth in Raydium & Meteora pools...');
-    solana.logMission('Neural reflection synchronized. Ready for autonomous operations.');
+    solana.logThought('Uplink established. Engaging Autonomous Surveillance loop...');
 
     render();
 
-    await updateVitals();
+    // Run brain cycle immediately
+    await runAutonomousCycle();
     startWebSocket();
 
-    const interval = setInterval(async () => {
-        await updateVitals();
+    // The 'Brain' cycle runs every 10 seconds to generate thoughts/missions
+    const brainInterval = setInterval(async () => {
+        await runAutonomousCycle();
+    }, 10000);
+    intervals.push(brainInterval);
+
+    // The 'UI' refresh runs every 3 seconds
+    const uiInterval = setInterval(() => {
         render();
     }, 3000);
-    intervals.push(interval);
+    intervals.push(uiInterval);
 
     render();
 }

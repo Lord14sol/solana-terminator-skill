@@ -166,10 +166,13 @@ export class SolanaAutonomy {
     console.log(`[LifeSupport] SOL: ${status.sol.toFixed(5)} | USDC: $${status.usdc.toFixed(4)}`);
 
     if (status.solLow) {
+      this.logThought('CRITICAL: SOL fuel reserves exhausted (0.00 SOL).');
+      this.logThought('Action: Emergency Hibernation. Waiting for refill to resume operations.');
       return { success: false, status: 'critical', message: 'SOL fuel exhausted' };
     }
 
     if (status.usdcLow) {
+      this.logThought(`Treasury Alert: USDC low ($${status.usdc.toFixed(2)}). Searching for market Alpha...`);
       console.log(`[LifeSupport] USDC CRITICAL ($${status.usdc.toFixed(4)}). Scanning for Alpha to stabilize...`);
 
       try {
@@ -197,6 +200,7 @@ export class SolanaAutonomy {
       }
     }
 
+    this.logThought('System Status: NOMINAL. Monitoring market for autonomous opportunities...');
     return { success: true, status: 'nominal' };
   }
 

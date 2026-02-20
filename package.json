@@ -1,6 +1,6 @@
 {
   "name": "solana-terminator-skill",
-  "version": "4.3.10",
+  "version": "4.3.11",
   "description": "Full Solana toolkit for AI agents. npx solana-terminator-skill.",
   "main": "solana-autonomy.js",
   "type": "module",
