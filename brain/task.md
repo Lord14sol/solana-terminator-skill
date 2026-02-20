@@ -17,8 +17,9 @@
 - [x] Hardened Architecture & RPC Resilience (v4.8.0) <!-- id: 54 -->
 - [x] Final Zero-Emoji Branding & README update <!-- id: 58 -->
 - [x] Resolve DEP0190 (Explicit shell:false) (v4.8.3) <!-- id: 59 -->
-- [x] Correct Section 3 Header Version in Audit Report <!-- id: 60 -->
-- [x] Final Publish to NPM (v4.8.3) <!-- id: 55 -->
-- [x] High-Detail Technical Audit Report (v4.8.3) <!-- id: 56 -->
+- [x] UI Stability & Null-Safe Balances (v4.8.4) <!-- id: 61 -->
+- [x] Refined Process Spawning (execPath) (v4.8.4) <!-- id: 62 -->
+- [x] Final Publish to NPM (v4.8.4) <!-- id: 55 -->
+- [x] High-Detail Technical Audit Report (v4.8.4) <!-- id: 56 -->
 - [x] Global Documentation Sync to GitHub <!-- id: 57 -->
 - [ ] Future: Monetization Protocol v5.0 <!-- id: 52 -->

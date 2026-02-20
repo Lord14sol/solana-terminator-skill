@@ -5,7 +5,7 @@
 The Sovereign Commercial Brain has been audited for absolute compatibility with the **Conway Research Automaton** ecosystem.
 
 ### Verified Points
-- [x] **NPM Production**: v4.8.3 is live and installable via `npx`.
+- [x] **NPM Production**: v4.8.4 is live and installable via `npx`.
 - [x] **Shell Security**: Resolved `DEP0190` by explicitly setting `shell: false`.
 - [x] **Hardened RPC**: `getSolBalance` / `getUsdcBalance` return `null` on error.
 - [x] **Stabilization First**: Treasury stabilization is prioritized before growth swaps.
