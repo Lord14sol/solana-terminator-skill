@@ -1,4 +1,4 @@
-# TECHNICAL AUDIT REPORT: P.R.E.D.A.T.O.R. Sovereign Engine v4.8.5
+# TECHNICAL AUDIT REPORT: P.R.E.D.A.T.O.R. Sovereign Engine v4.8.6
 **Subject**: P.R.E.D.A.T.O.R. (Hardened Web 4.0 Skill for Solana)
 **Ecosystem**: Conway Research Automaton / Solana Mainnet
 **Status**: Production Ready / Verified Alignment
@@ -159,6 +159,9 @@ proceeding to the next:
     100% client-side signing. Private keys never leave ~/.automaton/.
     Stored at mode 0o600. Directory at mode 0o700.
 
+    - UI/TTY PINNING (v4.8.6): Implemented Promise-based `pauseAndReturn` with
+      800ms input isolation buffer. Guaranteed to prevent premature menu
+      returns on View Balance/Identity screens.
     - TTY/UI STABILITY (v4.8.5): Resolved premature exits in Menu navigation by
       refactoring keyboard listeners to use non-overlapping keypress events
       and implementing a buffered 'pauseAndReturn' mechanism.
@@ -211,6 +214,6 @@ When auditing this codebase, verify:
 ─────────────────────────────────────────────────────────────────────────────
 
 Verified by: Antigravity AI
-Version:     4.8.5 "Hardened Architecture"
-Code audit:  Claude (Anthropic) — bugs #1–#8 identified and patched
+Version:     4.8.6 "Hardened Architecture"
+Code audit:  Claude (Anthropic) — bugs #1–#9 identified and patched
              🦾🏁🚀🏁🦾

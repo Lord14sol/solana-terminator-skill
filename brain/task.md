@@ -18,8 +18,9 @@
 - [x] Final Zero-Emoji Branding & README update <!-- id: 58 -->
 - [x] Resolve DEP0190 (Explicit shell:false) (v4.8.3) <!-- id: 59 -->
 - [x] UI Stability & Null-Safe Balances (v4.8.4) <!-- id: 61 -->
-- [x] Refined Process Spawning (execPath) (v4.8.4) <!-- id: 62 -->
-- [x] Final Publish to NPM (v4.8.4) <!-- id: 55 -->
-- [x] High-Detail Technical Audit Report (v4.8.4) <!-- id: 56 -->
+- [x] TTY Stability & Keyboard Buffer (v4.8.5) <!-- id: 62 -->
+- [x] Absolute UI Pinning & Promise Buffer (v4.8.6) <!-- id: 63 -->
+- [x] Final Publish to NPM (v4.8.6) <!-- id: 55 -->
+- [x] High-Detail Technical Audit Report (v4.8.6) <!-- id: 56 -->
 - [x] Global Documentation Sync to GitHub <!-- id: 57 -->
 - [ ] Future: Monetization Protocol v5.0 <!-- id: 52 -->
