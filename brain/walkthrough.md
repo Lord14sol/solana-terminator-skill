@@ -1,21 +1,23 @@
-# P.R.E.D.A.T.O.R. v4.8.0 — Hardened Architecture Walkthrough
+# P.R.E.D.A.T.O.R. v4.8.3 — Hardened Architecture Walkthrough
 
 ## 2000% Certainty Verification
 
 The Sovereign Commercial Brain has been audited for absolute compatibility with the **Conway Research Automaton** ecosystem.
 
 ### Verified Points
-- [x] **Hardened RPC**: `getSolBalance` / `getUsdcBalance` return `null` on error, preventing false 0 balance triggers.
+- [x] **NPM Production**: v4.8.3 is live and installable via `npx`.
+- [x] **Shell Security**: Resolved `DEP0190` by explicitly setting `shell: false`.
+- [x] **Hardened RPC**: `getSolBalance` / `getUsdcBalance` return `null` on error.
 - [x] **Stabilization First**: Treasury stabilization is prioritized before growth swaps.
 - [x] **Executable Tribute**: `harvestProfit` now actually sends the USDC tokens.
 - [x] **DexScreener API**: Corrected `/search` endpoints for Solana.
-- [x] **Numeric Scoring**: Security audits now provide a real 0-100 score.
+- [x] **Security Scores**: `auditTokenSecurity` returns a 0-100 numeric score.
 
 ## The Release Tweet (No Emojis)
 ```text
-The P.R.E.D.A.T.O.R. Sovereign Commercial Brain v4.8.0 is now live.
+The P.R.E.D.A.T.O.R. Sovereign Commercial Brain v4.8.3 is now live.
 
-This hardened release introduces a strict priority gate system for industrial-grade survival.
+This release hardens the installer's execution layer with explicit shell-safe protocols.
 
 Key functionalities:
 1. Null-safe RPC handling for balance verification accuracy.
