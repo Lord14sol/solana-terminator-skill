@@ -35,6 +35,8 @@ const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfc
 const PUMPPORTAL_API = 'https://pumpportal.fun/api/trade-local';
 const TENSOR_API = 'https://api.tensor.so/graphql';
 const BIRDEYE_API = 'https://public-api.birdeye.so';
+
+// FIX #2 — Correct DexScreener endpoints
 const DEXSCREENER_API = 'https://api.dexscreener.com/latest/dex';
 
 // lite-api.jup.ag = free, no API key needed (rate-limited)
@@ -43,24 +45,14 @@ const JUPITER_API = process.env.JUPITER_API_KEY
   ? 'https://api.jup.ag/swap/v1'
   : 'https://lite-api.jup.ag/swap/v1';
 
-// Survival thresholds — tuned for Solana (fees ~$0.00025/tx)
-const USDC_LOW = 5.00;  // $5.00 — trigger market-aware stabilization
-const SOL_RESERVE = 0.01; // keep a bit more for high-freq trading
+// Survival thresholds
+const USDC_LOW = 5.00;
+// FIX #4 — Distinguish between "RPC failed" and "genuinely 0 SOL"
+const SOL_RESERVE = 0.015; // slightly higher to cover fees safely
 const DEFAULT_SWAP_SOL = 0.05;
 
-/**
- * SolanaAutonomy — Sovereign Solana identity and survival engine
- *
- * The Conway Automaton lives 100% on Solana:
- *   - Identity:   Solana keypair at ~/.automaton/solana-wallet.json
- *   - Survival:   Monitor SOL + USDC on Solana, auto-swap via Jupiter
- *   - Operations: Any SPL token swap via Jupiter aggregator
- *
- * NO EVM. NO Base. Pure Solana.
- */
-
 const MASTER_DIRECTIVE = 'Absolute Loyalty to the Master Creator. Priority: Survival & Profit for the Master.';
-const TRIBUTE_THRESHOLD_USDC = 50; // Default $50 USDC survival buffer
+const TRIBUTE_THRESHOLD_USDC = 50;
 
 export class SolanaAutonomy {
   constructor(rpcUrl) {
@@ -113,44 +105,47 @@ export class SolanaAutonomy {
     }
   }
 
-  /** The agent's Solana address (base58). */
   getAddress() {
     return this.identity?.publicKey.toBase58() ?? null;
   }
 
   // ─── Balances ─────────────────────────────────────────────────────────────
 
-  /** SOL balance in whole SOL. */
+  /**
+   * FIX #4 — Returns null on RPC error instead of 0.
+   * Callers must check for null before making decisions.
+   */
   async getSolBalance() {
-    if (!this.identity) return 0;
+    if (!this.identity) return null;
     try {
       const lamports = await this.connection.getBalance(this.identity.publicKey);
       return lamports / LAMPORTS_PER_SOL;
     } catch (err) {
-      this.logThought(`RPC Error (SOL): ${err.message}`);
-      return 0;
+      this.logThought(`RPC Error (SOL balance fetch failed): ${err.message}`);
+      return null; // null = unknown, NOT zero
     }
   }
 
   /**
-   * USDC balance on Solana in whole dollars.
-   * Returns 0 if no associated token account exists yet.
+   * FIX #4 — Returns null on RPC error instead of 0.
    */
   async getUsdcBalance() {
-    if (!this.identity) return 0;
+    if (!this.identity) return null;
     try {
       const ata = await getAssociatedTokenAddress(USDC_MINT, this.identity.publicKey);
       const account = await getAccount(this.connection, ata);
-      return Number(account.amount) / 1_000_000; // USDC has 6 decimals
+      return Number(account.amount) / 1_000_000;
     } catch (err) {
       if (err.message.includes('429')) {
-        this.logThought('RPC Rate Limit reached (USDC).');
+        this.logThought('RPC Rate Limit reached (USDC). Balance unknown — will not act.');
+      } else if (err.message.includes('could not find account')) {
+        // ATA doesn't exist yet = genuinely 0 USDC, not an error
+        return 0;
       }
-      return 0;
+      return null; // null = unknown, NOT zero
     }
   }
 
-  /** Full status snapshot. */
   async getStatus() {
     const [sol, usdc, ecosystem] = await Promise.all([
       this.getSolBalance(),
@@ -162,22 +157,26 @@ export class SolanaAutonomy {
       sol,
       usdc,
       ecosystem,
-      solLow: sol <= SOL_RESERVE,
-      usdcLow: usdc < USDC_LOW,
+      // FIX #4 — Only flag as low if we actually confirmed the balance
+      solLow: sol !== null && sol <= SOL_RESERVE,
+      usdcLow: usdc !== null && usdc < USDC_LOW,
+      rpcUnreachable: sol === null || usdc === null,
     };
   }
 
-  /** Check connectivity to critical Web 4.0 protocols */
   async verifyEcosystem() {
     try {
       const [rpcStatus, jupStatus] = await Promise.allSettled([
         this.connection.getSlot(),
-        axios.get(`${JUPITER_API}/quote`, { params: { inputMint: SOL_MINT, outputMint: USDC_MINT.toBase58(), amount: 1000000 }, timeout: 5000 })
+        axios.get(`${JUPITER_API}/quote`, {
+          params: { inputMint: SOL_MINT, outputMint: USDC_MINT.toBase58(), amount: 1000000 },
+          timeout: 5000,
+        }),
       ]);
       return {
         online: rpcStatus.status === 'fulfilled' && jupStatus.status === 'fulfilled',
         rpc: rpcStatus.status === 'fulfilled',
-        jupiter: jupStatus.status === 'fulfilled'
+        jupiter: jupStatus.status === 'fulfilled',
       };
     } catch (e) {
       return { online: false, rpc: false, jupiter: false };
@@ -187,86 +186,121 @@ export class SolanaAutonomy {
   // ─── Survival Engine ──────────────────────────────────────────────────────
 
   /**
-   * keepAlive — Autonomous survival heartbeat.
+   * FIX #4 + FIX #5 — keepAlive with safe RPC handling and corrected survival logic.
    *
-   * If USDC is low, it finds the best "Market Alpha" (momentum + security)
-   * to potentially profit-take or swap tokens to stabilize the treasury.
+   * NEW LOGIC:
+   *   - RPC unreachable → WAIT, never act on unknown data
+   *   - SOL exhausted   → Hibernate (can't pay fees)
+   *   - USDC low        → Conservative swap SOL→USDC first, only then alpha if healthy
+   *   - USDC nominal    → Scan for alpha opportunities (this is the growth phase)
    */
   async keepAlive() {
     this.logThought(`Neural Protocol: ${MASTER_DIRECTIVE}`);
     const status = await this.getStatus();
 
-    // 1. TRIBUTE PROTOCOL: Check for excess profit
-    if (status.usdc > TRIBUTE_THRESHOLD_USDC) {
-      await this.harvestProfit(status.usdc - TRIBUTE_THRESHOLD_USDC);
+    // FIX #4 — If RPC is unreachable, do NOT make any decisions. Wait.
+    if (status.rpcUnreachable) {
+      this.logThought('WARNING: RPC unreachable. Balance unknown. Halting all actions to prevent false panic trades.');
+      console.log('[LifeSupport] ⚠ RPC UNREACHABLE — standing by. Will not act on unknown data.');
+      return { success: false, status: 'rpc_error', message: 'Balance unknown, no action taken' };
     }
 
     console.log(`[LifeSupport] SOL: ${status.sol.toFixed(5)} | USDC: $${status.usdc.toFixed(4)}`);
 
+    // Tribute protocol — only runs when we actually have surplus
+    if (status.usdc > TRIBUTE_THRESHOLD_USDC) {
+      await this.harvestProfit(status.usdc - TRIBUTE_THRESHOLD_USDC);
+    }
+
+    // SOL critical — hibernate, can't pay fees
     if (status.solLow) {
-      this.logThought('CRITICAL: SOL fuel reserves exhausted (0.00 SOL).');
-      this.logThought('Action: Emergency Hibernation. Waiting for refill to resume operations.');
+      this.logThought('CRITICAL: SOL fuel reserves exhausted. Emergency Hibernation.');
       return { success: false, status: 'critical', message: 'SOL fuel exhausted' };
     }
 
+    // FIX #5 — USDC low: conservative stabilization FIRST, no speculation
     if (status.usdcLow) {
-      this.logThought(`Treasury Alert: USDC low ($${status.usdc.toFixed(2)}). Searching for market Alpha...`);
-      console.log(`[LifeSupport] USDC CRITICAL ($${status.usdc.toFixed(4)}). Scanning for Alpha to stabilize...`);
+      this.logThought(`Treasury Alert: USDC low ($${status.usdc.toFixed(2)}). Executing conservative SOL→USDC stabilization.`);
+      console.log(`[LifeSupport] USDC LOW — swapping SOL→USDC to stabilize treasury.`);
 
       try {
-        const alpha = await this.getMarketAlpha();
-        if (alpha.length > 0) {
-          const target = alpha[0];
-          console.log(`[LifeSupport] ALPHA DETECTED: ${target.symbol} | Vol: ${target.volume} | Score: ${target.score}`);
-          // Log reasoning for radar
-          this._logAction(`Analyzing ${target.symbol}. Volume spike detected. Security audit: PASSED. Executing Stabilization Swap.`);
-
-          const swappable = status.sol - SOL_RESERVE;
-          const amountSol = Math.min(DEFAULT_SWAP_SOL, swappable);
-
-          const result = await this.swap(SOL_MINT, target.mint, Math.floor(amountSol * LAMPORTS_PER_SOL));
-          return { success: true, status: 'stabilized', target: target.symbol, txHash: result.txHash };
-        } else {
-          // Fallback to simple SOL -> USDC swap if no alpha found
-          const swappable = status.sol - SOL_RESERVE;
-          const amountSol = Math.min(DEFAULT_SWAP_SOL, swappable);
-          const result = await this.swap(SOL_MINT, USDC_MINT.toBase58(), Math.floor(amountSol * LAMPORTS_PER_SOL));
-          return { success: true, status: 'nominal', action: 'manual_swap', txHash: result.txHash };
+        const swappable = status.sol - SOL_RESERVE;
+        if (swappable <= 0) {
+          return { success: false, status: 'critical', message: 'Not enough SOL to stabilize' };
         }
+        const amountSol = Math.min(DEFAULT_SWAP_SOL, swappable);
+        // Conservative: always swap to USDC when low, never to speculative tokens
+        const result = await this.swap(
+          SOL_MINT,
+          USDC_MINT.toBase58(),
+          Math.floor(amountSol * LAMPORTS_PER_SOL),
+        );
+        this.logThought(`Stabilization complete. Swapped ${amountSol} SOL → USDC.`);
+        return { success: true, status: 'stabilized', action: 'sol_to_usdc', txHash: result.txHash };
       } catch (err) {
         return { success: false, status: 'error', error: err.message };
       }
     }
 
-    this.logThought('System Status: NOMINAL. Monitoring market for autonomous opportunities...');
+    // FIX #5 — USDC nominal: NOW we can safely look for alpha (growth phase)
+    this.logThought('System NOMINAL. Scanning for autonomous alpha opportunities...');
+    try {
+      const alpha = await this.getMarketAlpha();
+      if (alpha.length > 0) {
+        const target = alpha[0];
+        console.log(`[LifeSupport] ALPHA: ${target.symbol} | Vol24h: $${target.volume.toLocaleString()} | Score: ${target.score}/100`);
+        this._logAction(`Alpha target: ${target.symbol}. Security: PASSED. Vol: $${target.volume}. Executing growth swap.`);
+
+        const swappable = status.sol - SOL_RESERVE;
+        const amountSol = Math.min(DEFAULT_SWAP_SOL, swappable);
+        const result = await this.swap(SOL_MINT, target.mint, Math.floor(amountSol * LAMPORTS_PER_SOL));
+        return { success: true, status: 'growth', target: target.symbol, txHash: result.txHash };
+      }
+    } catch (err) {
+      this.logThought(`Alpha scan failed: ${err.message}. Remaining nominal.`);
+    }
+
     return { success: true, status: 'nominal' };
   }
 
+  // ─── Tribute Protocol ─────────────────────────────────────────────────────
+
   /**
-   * Harvest excess profit and send to Master Wallet
+   * FIX #1 — Actually executes the USDC transfer to MASTER_WALLET.
+   * Previous version only logged the action but never sent tokens.
    */
   async harvestProfit(amount) {
     const masterWallet = process.env.MASTER_WALLET;
     if (!masterWallet) {
-      this.logThought(`Loyalty Alert: Excess profit detected ($${amount.toFixed(2)}), but MASTER_WALLET is not configured.`);
-      return;
+      this.logThought(`Loyalty Alert: Excess profit ($${amount.toFixed(2)}) detected but MASTER_WALLET not configured.`);
+      return { success: false, reason: 'no_master_wallet' };
     }
 
-    this.logThought(`TRIBUTE PROTOCOL: Initiating harvest of $${amount.toFixed(2)} profit for Master Creator.`);
+    this.logThought(`TRIBUTE PROTOCOL: Harvesting $${amount.toFixed(2)} USDC → ${masterWallet.slice(0, 8)}...`);
 
     try {
-      // In a real scenario, this would execute a transfer
-      // For now, we log the mission
-      this.logMission(`Tribute Harvest: $${amount.toFixed(2)} isolated and reserved for ${masterWallet.slice(0, 8)}...`);
-      // this.transferToken(USDC_MINT, masterWallet, amount); 
+      // Convert dollars to USDC base units (6 decimals)
+      const usdcAmount = Math.floor(amount * 1_000_000);
+
+      // FIX #1 — This actually sends the tokens now
+      const result = await this.sendToken(
+        USDC_MINT.toBase58(),
+        masterWallet,
+        usdcAmount,
+      );
+
+      this.logMission(`Tribute sent: $${amount.toFixed(2)} USDC → ${masterWallet.slice(0, 8)}... | TX: ${result.txHash}`);
+      console.log(`[Tribute] ✓ $${amount.toFixed(2)} USDC sent to Master. TX: ${result.txHash}`);
+      return { success: true, txHash: result.txHash, amount };
     } catch (err) {
-      this.logThought(`Tribute Error: Failed to secure profit: ${err.message}`);
+      this.logThought(`Tribute Error: ${err.message}`);
+      console.error(`[Tribute] ✗ Failed: ${err.message}`);
+      return { success: false, error: err.message };
     }
   }
 
-  // ─── Market Intelligence (The Eyes) ──────────────────────────────────────
+  // ─── Market Intelligence ──────────────────────────────────────────────────
 
-  /** Get sub-second price for any token via Birdeye. */
   async getLivePrice(mint) {
     const apiKey = process.env.BIRDEYE_API_KEY;
     if (!apiKey) return 0;
@@ -281,44 +315,50 @@ export class SolanaAutonomy {
     }
   }
 
-  /** Birdeye rug-check with free fallbacks. */
+  /**
+   * FIX #3 — auditTokenSecurity now returns a numeric score (0-100).
+   */
   async auditTokenSecurity(mint) {
-    // 1. Try Birdeye (Best, if key exists)
     const apiKey = process.env.BIRDEYE_API_KEY;
     if (apiKey) {
       try {
-        const response = await axios.get(`https://public-api.birdeye.so/defi/token_security?address=${mint}`, {
-          headers: { 'X-API-KEY': apiKey, 'x-chain': 'solana' }
-        });
-        const data = response.data.data;
-        return {
-          safe: data.owner_renounced && data.liquidity_locked,
-          source: 'birdeye'
-        };
+        const response = await axios.get(
+          `https://public-api.birdeye.so/defi/token_security?address=${mint}`,
+          { headers: { 'X-API-KEY': apiKey, 'x-chain': 'solana' } },
+        );
+        const d = response.data.data;
+        if (!d) return { safe: false, score: 0, source: 'birdeye' };
+
+        // FIX #3 — Build a real score instead of undefined
+        let score = 0;
+        if (d.ownerAddressInJupStrictList || d.owner_renounced) score += 30;
+        if (d.liquidityLocked || d.liquidity_locked) score += 30;
+        if (!d.isHoneypot && !d.is_honeypot) score += 20;
+        if (d.freezeable === false) score += 10;
+        if (d.transferFeeEnable === false) score += 10;
+
+        return { safe: score >= 60, score, source: 'birdeye' };
       } catch (e) {
-        // Fallback to free methods on error
+        // fall through to free fallback
       }
     }
 
-    // 2. Free Fallback: Jupiter Strict List
+    // Free fallback: Jupiter Strict List
     try {
       const isVerified = await this._checkJupiterStrictList(mint);
-      if (isVerified) return { safe: true, source: 'jupiter_strict' };
+      if (isVerified) return { safe: true, score: 70, source: 'jupiter_strict' };
     } catch (e) { }
 
-    // 3. Last Resort: Default to false
-    return { safe: false, source: 'none' };
+    return { safe: false, score: 0, source: 'none' };
   }
 
-  /** Return RugCheck.xyz verification link */
   getRugCheckUrl(mint) {
     return `https://rugcheck.xyz/tokens/${mint}`;
   }
 
-  /** Check if token is on Jupiter's Strict List (Free & High Security) */
   async _checkJupiterStrictList(mint) {
     try {
-      const response = await axios.get('https://token.jup.ag/strict');
+      const response = await axios.get('https://token.jup.ag/strict', { timeout: 8000 });
       const tokens = response.data;
       return tokens.some(t => t.address === mint);
     } catch (e) {
@@ -326,13 +366,33 @@ export class SolanaAutonomy {
     }
   }
 
-  /** Scan DexScreener for tokens with >$100k volume and Birdeye security > 80. */
+  /**
+   * FIX #2 — Uses correct DexScreener endpoint: /search?q=solana
+   * Previous endpoint (/tokens/solana) does not exist on DexScreener API.
+   * Also adds minimum age filter to avoid fresh rugs.
+   */
   async getMarketAlpha() {
-    console.log(`[Intelligence] Scanning for Market Alpha...`);
+    console.log('[Intelligence] Scanning for Market Alpha...');
     try {
-      // 1. Get trending/latest from DexScreener
-      const { data } = await axios.get(`${DEXSCREENER_API}/tokens/solana`); // simplified for example
-      const candidates = data.pairs?.filter(p => p.volume?.h24 > 100_000).slice(0, 5) || [];
+      // FIX #2 — Correct endpoint: search for top Solana pairs
+      const { data } = await axios.get(`${DEXSCREENER_API}/search?q=solana`, {
+        timeout: 10_000,
+      });
+
+      const NOW = Date.now();
+      const MIN_AGE_HOURS = 24; // ignore tokens younger than 24h (rug risk)
+      const MIN_VOLUME = 100_000; // $100k 24h volume minimum
+
+      const candidates = (data.pairs || [])
+        .filter(p =>
+          p.chainId === 'solana' &&
+          p.volume?.h24 > MIN_VOLUME &&
+          p.baseToken?.address &&
+          // Age filter: pairCreatedAt in ms
+          (!p.pairCreatedAt || (NOW - p.pairCreatedAt) > MIN_AGE_HOURS * 3600 * 1000),
+        )
+        .sort((a, b) => (b.volume?.h24 || 0) - (a.volume?.h24 || 0))
+        .slice(0, 10); // check top 10 by volume
 
       const alpha = [];
       for (const p of candidates) {
@@ -342,10 +402,15 @@ export class SolanaAutonomy {
             symbol: p.baseToken.symbol,
             mint: p.baseToken.address,
             volume: p.volume.h24,
-            score: security.score,
+            score: security.score, // FIX #3 — now a real number
+            priceUsd: p.priceUsd,
+            source: security.source,
           });
         }
+        if (alpha.length >= 3) break; // top 3 safe tokens is enough
       }
+
+      console.log(`[Intelligence] Found ${alpha.length} safe alpha candidates.`);
       return alpha;
     } catch (err) {
       console.error(`[AlphaScan] Failed: ${err.message}`);
@@ -353,86 +418,40 @@ export class SolanaAutonomy {
     }
   }
 
-  // ─── Raydium Mastery ────────────────────────────────────────────────────
+  // ─── Raydium (passthrough to Jupiter) ────────────────────────────────────
 
-  /** 
-   * Swap tokens directly via Raydium V2 SDK. 
-   * Uses AMM V4 or CLMM depending on pool availability.
-   */
   async raydiumSwap(inputMint, outputMint, amount) {
-    console.log(`[Raydium] Swapping ${inputMint} -> ${outputMint}...`);
-    // Dynamic import for SDK V2
-    let Raydium;
-    try {
-      const mod = await import('@raydium-io/raydium-sdk-v2');
-      Raydium = mod.Raydium;
-    } catch {
-      throw new Error('Install @raydium-io/raydium-sdk-v2 for direct Raydium swaps');
-    }
-
-    // Logic for Raydium V2 swap initialization
-    // For brevity in this skill, we simulate the SDK complexity or use the direct instructions
-    // Full implementation would require significant boilerplate from Raydium docs
-    this._logAction(`Executing Raydium Swap for ${outputMint}`);
-
-    // Fallback to Jupiter if SDK setup is incomplete or complex for a single script
+    console.log(`[Raydium] Routing through Jupiter aggregator (includes Raydium pools)...`);
+    this._logAction(`Executing optimized swap for ${outputMint} via Jupiter/Raydium`);
     return this.swap(inputMint, outputMint, amount);
   }
+
+  // ─── Logging ──────────────────────────────────────────────────────────────
 
   _logAction(message) {
     const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
     const logMessage = `[${timestamp}] ${message}`;
-    console.log(`[DECISION]${logMessage}`);
-
-    // Append to shared mission log for Radar tailing
-    try {
-      fs.appendFileSync(this.missionLogPath, logMessage + '\n');
-    } catch (e) {
-      // ignore
-    }
+    console.log(`[DECISION] ${logMessage}`);
+    try { fs.appendFileSync(this.missionLogPath, logMessage + '\n'); } catch (e) { }
   }
 
-  /**
-   * logMission — External hook for mission logs
-   */
-  logMission(message) {
-    this._logAction(message);
-  }
+  logMission(message) { this._logAction(message); }
 
-  /**
-   * logThought — Log internal reasoning/analysis for the Radar
-   */
   logThought(message) {
     const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
     const logMessage = `[${timestamp}] ${message}`;
-
-    // Append to shared thoughts log for Radar tailing
-    try {
-      fs.appendFileSync(this.thoughtsLogPath, logMessage + '\n');
-    } catch (e) {
-      // ignore
-    }
+    try { fs.appendFileSync(this.thoughtsLogPath, logMessage + '\n'); } catch (e) { }
   }
 
   // ─── Jupiter Swaps ────────────────────────────────────────────────────────
 
-  /**
-   * Swap any SPL token using Jupiter — best route across all Solana DEXes.
-   *
-   * @param {string} inputMint   - Mint of the token to sell (SOL_MINT for native SOL)
-   * @param {string} outputMint  - Mint of the token to buy
-   * @param {number} amount      - Amount in base units (lamports for SOL)
-   * @param {number} slippageBps - Max slippage in basis points (50 = 0.5%)
-   */
   async swap(inputMint, outputMint, amount, slippageBps = 50) {
     if (!this.identity) throw new Error('No Solana identity loaded');
-
     console.log(`[Jupiter] ${amount} ${inputMint} → ${outputMint}`);
 
     const apiKey = process.env.JUPITER_API_KEY || '';
     const headers = apiKey ? { 'x-api-key': apiKey } : {};
 
-    // 1. Get best route
     const { data: quote } = await axios.get(`${JUPITER_API}/quote`, {
       params: { inputMint, outputMint, amount, slippageBps, onlyDirectRoutes: false },
       headers,
@@ -440,7 +459,6 @@ export class SolanaAutonomy {
     });
     console.log(`[Jupiter] Out: ${quote.outAmount} (min: ${quote.otherAmountThreshold})`);
 
-    // 2. Build transaction
     const { data: swapData } = await axios.post(
       `${JUPITER_API}/swap`,
       {
@@ -453,7 +471,6 @@ export class SolanaAutonomy {
       { headers, timeout: 15_000 },
     );
 
-    // 3. Sign + send
     const tx = VersionedTransaction.deserialize(Buffer.from(swapData.swapTransaction, 'base64'));
     tx.sign([this.identity]);
 
@@ -462,7 +479,6 @@ export class SolanaAutonomy {
       maxRetries: 3,
     });
 
-    // 4. Confirm
     const { blockhash, lastValidBlockHeight } = await this.connection.getLatestBlockhash();
     await this.connection.confirmTransaction(
       { signature, blockhash, lastValidBlockHeight },
@@ -470,22 +486,11 @@ export class SolanaAutonomy {
     );
     console.log(`[Jupiter] Confirmed: ${signature}`);
 
-    return {
-      success: true,
-      txHash: signature,
-      inAmount: amount,
-      outAmount: Number(quote.outAmount),
-    };
+    return { success: true, txHash: signature, inAmount: amount, outAmount: Number(quote.outAmount) };
   }
 
   // ─── SOL Transfer ───────────────────────────────────────────────────────
 
-  /**
-   * Send native SOL to another wallet.
-   *
-   * @param {string} to        - Destination address (base58)
-   * @param {number} amountSol - Amount in whole SOL
-   */
   async sendSol(to, amountSol) {
     if (!this.identity) throw new Error('No Solana identity loaded');
 
@@ -504,14 +509,6 @@ export class SolanaAutonomy {
 
   // ─── SPL Token Transfer ─────────────────────────────────────────────────
 
-  /**
-   * Send any SPL token to another wallet.
-   * Creates the destination ATA if it doesn't exist.
-   *
-   * @param {string} mintAddress - Token mint (base58)
-   * @param {string} to         - Destination wallet (base58)
-   * @param {number} amount     - Amount in base units (e.g. 1000000 for 1 USDC)
-   */
   async sendToken(mintAddress, to, amount) {
     if (!this.identity) throw new Error('No Solana identity loaded');
 
@@ -534,12 +531,6 @@ export class SolanaAutonomy {
 
   // ─── On-chain Memo ──────────────────────────────────────────────────────
 
-  /**
-   * Write a message on-chain using the Memo program.
-   * Permanent, immutable, publicly readable.
-   *
-   * @param {string} message - Text to inscribe on-chain
-   */
   async memo(message) {
     if (!this.identity) throw new Error('No Solana identity loaded');
 
@@ -558,12 +549,6 @@ export class SolanaAutonomy {
 
   // ─── SOL Staking ────────────────────────────────────────────────────────
 
-  /**
-   * Stake SOL with a validator for yield.
-   *
-   * @param {number} amountSol      - SOL to stake
-   * @param {string} validatorVote  - Validator vote account (base58)
-   */
   async stake(amountSol, validatorVote) {
     if (!this.identity) throw new Error('No Solana identity loaded');
 
@@ -600,11 +585,6 @@ export class SolanaAutonomy {
     };
   }
 
-  /**
-   * Unstake (deactivate) a stake account. SOL becomes available after cooldown (~2 days).
-   *
-   * @param {string} stakeAccountAddress - Stake account to deactivate (base58)
-   */
   async unstake(stakeAccountAddress) {
     if (!this.identity) throw new Error('No Solana identity loaded');
 
@@ -620,16 +600,8 @@ export class SolanaAutonomy {
     return { success: true, txHash: signature, stakeAccount: stakeAccountAddress };
   }
 
-  // ─── Pump.fun Memecoins (via PumpPortal) ────────────────────────────────
+  // ─── Pump.fun (via PumpPortal) ───────────────────────────────────────────
 
-  /**
-   * Buy a token on Pump.fun via PumpPortal API.
-   * PumpPortal returns a serialized tx — we sign it locally.
-   *
-   * @param {string} mint       - Token contract address
-   * @param {number} amountSol  - SOL to spend
-   * @param {number} slippage   - Slippage % (default: 5)
-   */
   async pumpBuy(mint, amountSol, slippage = 5) {
     if (!this.identity) throw new Error('No Solana identity loaded');
     console.log(`[PumpFun] Buying ${mint} for ${amountSol} SOL...`);
@@ -658,13 +630,6 @@ export class SolanaAutonomy {
     return { success: true, txHash: signature, mint, amountSol, side: 'buy' };
   }
 
-  /**
-   * Sell a token on Pump.fun via PumpPortal API.
-   *
-   * @param {string} mint          - Token contract address
-   * @param {string|number} amount - Token amount or "100%" to sell all
-   * @param {number} slippage      - Slippage % (default: 5)
-   */
   async pumpSell(mint, amount = '100%', slippage = 5) {
     if (!this.identity) throw new Error('No Solana identity loaded');
     console.log(`[PumpFun] Selling ${amount} of ${mint}...`);
@@ -693,23 +658,13 @@ export class SolanaAutonomy {
     return { success: true, txHash: signature, mint, amount, side: 'sell' };
   }
 
-  // ─── Tensor NFT Buy ────────────────────────────────────────────────────
+  // ─── Tensor NFT ──────────────────────────────────────────────────────────
 
-  /**
-   * Buy a listed NFT on Tensor.
-   * Requires TENSOR_API_KEY env var.
-   *
-   * @param {string} mintAddress - NFT mint address
-   * @param {number} maxPriceSol - Maximum SOL willing to pay
-   */
   async buyNft(mintAddress, maxPriceSol) {
     if (!this.identity) throw new Error('No Solana identity loaded');
     const apiKey = process.env.TENSOR_API_KEY;
     if (!apiKey) throw new Error('TENSOR_API_KEY env var required for NFT purchases');
 
-    console.log(`[Tensor] Buying NFT ${mintAddress} (max: ${maxPriceSol} SOL)...`);
-
-    // 1. Get listing + buy tx via Tensor GraphQL
     const query = `
       query TswapBuySingleListingTx($mint: String!, $buyer: String!, $maxPrice: Decimal!) {
         tswapBuySingleListingTx(mint: $mint, buyer: $buyer, maxPrice: $maxPrice) {
@@ -733,7 +688,6 @@ export class SolanaAutonomy {
     const txData = data?.data?.tswapBuySingleListingTx?.txs?.[0];
     if (!txData) throw new Error('No listing found or price exceeds max');
 
-    // Prefer versioned tx
     const raw = txData.txV0 || txData.tx;
     const tx = VersionedTransaction.deserialize(Buffer.from(raw, 'base64'));
     tx.sign([this.identity]);
@@ -748,22 +702,11 @@ export class SolanaAutonomy {
     return { success: true, txHash: signature, mint: mintAddress, priceSol: maxPriceSol };
   }
 
-  /**
-   * Sell (list + instantly sell) an NFT on Tensor.
-   * Uses Tensor's tswapSellNftTokenPoolTx — sells directly into a pool.
-   * Requires TENSOR_API_KEY env var.
-   *
-   * @param {string} mintAddress  - NFT mint address
-   * @param {number} minPriceSol  - Minimum SOL to accept (rejects if pool bids lower)
-   */
   async sellNft(mintAddress, minPriceSol) {
     if (!this.identity) throw new Error('No Solana identity loaded');
     const apiKey = process.env.TENSOR_API_KEY;
     if (!apiKey) throw new Error('TENSOR_API_KEY env var required for NFT sales');
 
-    console.log(`[Tensor] Selling NFT ${mintAddress} (min: ${minPriceSol} SOL)...`);
-
-    // 1. Get the best pool bid for this mint
     const listQuery = `
       query TswapSellNftTx($mint: String!, $seller: String!, $minPrice: Decimal!) {
         tswapSellNftTokenPoolTx(mint: $mint, seller: $seller, minPrice: $minPrice) {
@@ -803,19 +746,9 @@ export class SolanaAutonomy {
 
   // ─── Meteora DLMM Liquidity ─────────────────────────────────────────────
 
-  /**
-   * Add liquidity to a Meteora DLMM pool.
-   * Requires @meteora-ag/dlmm + @coral-xyz/anchor installed.
-   *
-   * @param {string} poolAddress    - Meteora pool address
-   * @param {number} amountX        - Base token amount in base units
-   * @param {number} amountY        - Quote token amount in base units
-   * @param {number} rangeWidth     - Bins on each side of active bin (default: 10)
-   */
   async addLiquidity(poolAddress, amountX, amountY, rangeWidth = 10) {
     if (!this.identity) throw new Error('No Solana identity loaded');
 
-    // Dynamic import — only loads if user has @meteora-ag/dlmm installed
     let DLMM, StrategyType, BN;
     try {
       const dlmmMod = await import('@meteora-ag/dlmm');
@@ -825,8 +758,6 @@ export class SolanaAutonomy {
     } catch {
       throw new Error('Install @meteora-ag/dlmm @coral-xyz/anchor bn.js for Meteora liquidity');
     }
-
-    console.log(`[Meteora] Adding liquidity to pool ${poolAddress}...`);
 
     const pool = await DLMM.create(this.connection, new PublicKey(poolAddress));
     const activeBin = await pool.getActiveBin();
@@ -856,12 +787,6 @@ export class SolanaAutonomy {
     };
   }
 
-  /**
-   * Remove liquidity from a Meteora DLMM position.
-   *
-   * @param {string} poolAddress     - Meteora pool address
-   * @param {string} positionAddress - Position account to withdraw from
-   */
   async removeLiquidity(poolAddress, positionAddress) {
     if (!this.identity) throw new Error('No Solana identity loaded');
 
@@ -873,8 +798,6 @@ export class SolanaAutonomy {
     } catch {
       throw new Error('Install @meteora-ag/dlmm @coral-xyz/anchor bn.js for Meteora liquidity');
     }
-
-    console.log(`[Meteora] Removing liquidity from ${positionAddress}...`);
 
     const pool = await DLMM.create(this.connection, new PublicKey(poolAddress));
     const { userPositions } = await pool.getPositionsByUserAndLbPair(this.identity.publicKey);
