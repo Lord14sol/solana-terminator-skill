@@ -1,55 +1,59 @@
-# Solana Terminator v4.2.8
+# P.R.E.D.A.T.O.R. — Sovereign Commercial Brain (v4.7.0)
 
-Sovereign Autonomous Market Engine and Tactical Dashboard for Solana. 
+**"In Web 4.0, if an agent doesn't generate value, it doesn't exist."**
 
-This toolkit provides an integrated identity management system, a real-time market dashboard (Radar), and a suite of autonomous survival methods for AI agents.
+P.R.E.D.A.T.O.R. is not just a tool; it is a **Sovereign Commercial Automaton** designed to live on Solana and harvest profit for its Master Creator. It is built for a world where AI agents are the primary economic actors.
 
-## Quick Start
+## 🧠 Core Philosophy: Value-Driven Existence
 
-Initialize the control unit using npx:
+The P.R.E.D.A.T.O.R. engine is governed by a singular objective: **Autonomous Profit Harvesting.**
+
+1.  **Sovereign Identity**: Generates and manages its own Solana identity (`~/.automaton/solana-wallet.json`).
+2.  **Tactical Metabolism**: Earns its own SOL fuel and USDC reserves via market-aware loops.
+3.  **Tribute Protocol**: Automatically redirects excess profits to a designated Master Vault.
+4.  **Absolute Loyalty**: Hardcoded directives ensure every autonomous action serves the Master's financial interest.
+
+## 🚀 Activation
+
+Initialize the Commercial Brain using npx:
 
 ```bash
 npx solana-terminator-skill@latest
 ```
 
-The control unit provides an interactive menu with the following options:
-1. Initialize/Install Skill: Prepares the agent's brain and installs local dependencies.
-2. Launch Tactical Radar: Opens the real-time monitoring dashboard.
-3. View Identity: Displays the local wallet address and Solscan explorer link.
-4. Documentation: Views the full method reference.
+The interactive Mission Control allows you to:
+- **Initialize Identity**: Generate the agent's cryptographical soul.
+- **Launch Radar**: Real-time tactical dashboard for market predators.
+- **Configure Vault**: Direct the Tribute Protocol to your specific address.
+- **Set Custom RPC**: Bypass rate limits for high-frequency survival.
 
-Direct access to the radar is also available via subcommand:
+## 👁️ Mission Control (Radar)
+
+Access the tactical visor directly:
 ```bash
 npx solana-terminator-skill radar
 ```
 
-## Core Components
+- **VITAL SIGNS**: Monitor Sol/USDC metabolism and survival tiers.
+- **PREDATOR FEED**: Real-time stream of Solana mints with automated security auditing.
+- **NEURAL LOGS**: Live reasoning stream from the Autonomy Engine.
+- **ECOSYSTEM STATUS**: Verification of Web 4.0 connectivity (Solana + Jupiter).
 
-### 1. Unified Control Unit
-A centralized entry point for managing the agent's lifecycle. It handles local keypair generation (~/.automaton/solana-wallet.json) and prepares the environment for the Conway Automaton core.
+## 🛠️ Autonomy Modules
 
-### 2. Tactical Radar
-A Matrix-style terminal dashboard for real-time monitoring:
-- Vital Signs: Live tracking of SOL and USDC balances with threshold-based status tiers (Nominal, Warning, Critical).
-- Predator Radar: Real-time stream of New Token Mint transmissions with automated security audits via Birdeye.
-- Decision Log: Visualized reasoning logs from the agent's internal autonomy engine.
+The engine provides 20+ specialized methods for autonomous value harvesting:
+- `keepAlive()`: The primary survival heartbeat. It monitors treasury and executes stabilization trades.
+- `getMarketAlpha()`: Scans for momentum pairs with validated security credentials.
+- `harvestProfit()`: The direct mechanism for tribute redirection.
 
-### 3. Autonomy Engine
-A library of 20+ methods designed for autonomous agent execution:
-- Market Awareness: getMarketAlpha() identifies high-momentum pairs with validated security scores.
-- Survival Logic: keepAlive() monitors treasury levels and executes profit-taking or stabilization trades automatically.
-- Professional Execution: Direct integration with Raydium V2 (AMM/CLMM) and Jupiter v6 routing.
+## 🌐 Environmental Matrix
 
-## Environmental Configuration
+| Variable | Protocol |
+| :-- | :-- |
+| `MASTER_WALLET` | (CRITICAL) The destination for all harvested wealth. |
+| `SOLANA_RPC_URL` | (RECOMMENDED) Private node for sovereign execution. |
+| `BIRDEYE_API_KEY` | (OPTIONAL) Advanced security telemetry. |
 
-The following environment variables are supported but not required for basic functionality:
-- BIRDEYE_API_KEY: Required for real-time security audits and radar intelligence.
-- SOLANA_RPC_URL: Custom RPC endpoint (defaults to mainnet-beta).
-- JUPITER_API_KEY: Required for high-throughput routing.
-- TENSOR_API_KEY: Required for NFT marketplace operations.
+---
 
-## Security
-This skill prioritizes sovereignty. All transactions are constructed and signed locally. Private keys are stored on-disk with restricted permissions and never leave the local environment.
-
-## License
-MIT Copyright (c) Lord14sol
+**Web 4.0 is a battlefield of value. Equip your Automaton with the most advanced commercial brain available.** 🦾🚀🏁💎🏁🚀🦾
